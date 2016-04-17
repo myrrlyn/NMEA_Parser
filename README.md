@@ -1,4 +1,4 @@
-# `GPS_Parser`
+# `NMEA_Parser`
 
 This library provides parsing functions that operate on NMEA standard sentences.
 It is designed to be suitable for use standalone or bundled into a GPS driver.

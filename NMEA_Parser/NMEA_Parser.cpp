@@ -1,8 +1,8 @@
-#include "GPS_Parser.hpp"
+#include "NMEA_Parser.hpp"
 
 #include <Arduino.h>
 
-GPS_Parser::GPS_Parser() :
+NMEA_Parser::NMEA_Parser() :
 	_coordinates({
 		.latitude  = 0,
 		.longitude = 0,
@@ -24,7 +24,7 @@ GPS_Parser::GPS_Parser() :
 	_fix(false) {
 }
 
-nmea_err_t GPS_Parser::parse(char* nmea, uint8_t len) {
+nmea_err_t NMEA_Parser::parse(char* nmea, uint8_t len) {
 	register nmea_err_t err;
 
 	//  Guard against NULL idiocy
@@ -44,28 +44,28 @@ nmea_err_t GPS_Parser::parse(char* nmea, uint8_t len) {
 	return delegate_parse(nmea, len);
 }
 
-nmea_coord_t GPS_Parser::coordinates() {
+nmea_coord_t NMEA_Parser::coordinates() {
 	return _coordinates;
 }
 
-nmea_timestamp_t GPS_Parser::timestamp() {
+nmea_timestamp_t NMEA_Parser::timestamp() {
 	return _timestamp;
 }
 
-nmea_velocity_t GPS_Parser::velocity() {
+nmea_velocity_t NMEA_Parser::velocity() {
 	return _velocity;
 }
 
-nmea_magvar_t GPS_Parser::magnetic_variation() {
+nmea_magvar_t NMEA_Parser::magnetic_variation() {
 	return _magvar;
 }
 
-bool GPS_Parser::fix() {
+bool NMEA_Parser::fix() {
 	return _fix;
 }
 
 #ifdef ARDUINO
-void GPS_Parser::print_info() {
+void NMEA_Parser::print_info() {
 	Serial.print("Timestamp: ");
 	Serial.print(_timestamp.year);
 	Serial.print('-');
@@ -97,7 +97,7 @@ void GPS_Parser::print_info() {
 }
 #endif
 
-uint8_t GPS_Parser::parse_hex(char c) {
+uint8_t NMEA_Parser::parse_hex(char c) {
 	register uint8_t ret = 0x00;
 	if (c >= '0' && c <= '9') {
 		ret = c - '0';
@@ -111,7 +111,7 @@ uint8_t GPS_Parser::parse_hex(char c) {
 	return ret;
 }
 
-uint8_t GPS_Parser::parse_hex(char h, char l) {
+uint8_t NMEA_Parser::parse_hex(char h, char l) {
 	register uint8_t ret = 0x00;
 	ret |= parse_hex(l);
 	ret |= parse_hex(h) << 4;
@@ -120,14 +120,14 @@ uint8_t GPS_Parser::parse_hex(char h, char l) {
 
 //  Protected
 
-nmea_err_t GPS_Parser::delegate_parse(char* nmea, uint8_t len) {
+nmea_err_t NMEA_Parser::delegate_parse(char* nmea, uint8_t len) {
 	if (strstr(nmea, "$GPRMC")) {
 		return parse_rmc(nmea, len);
 	}
 	return nmea_err_unknown;
 }
 
-nmea_err_t GPS_Parser::validate_checksum(char* nmea, uint8_t len) {
+nmea_err_t NMEA_Parser::validate_checksum(char* nmea, uint8_t len) {
 	char* p = strchr(nmea, '*');
 	if (p != NULL) {
 		len = strlen(p);
@@ -149,7 +149,7 @@ nmea_err_t GPS_Parser::validate_checksum(char* nmea, uint8_t len) {
 	return nmea_err_nocsum;
 }
 
-nmea_err_t GPS_Parser::parse_rmc(char* nmea, uint8_t len) {
+nmea_err_t NMEA_Parser::parse_rmc(char* nmea, uint8_t len) {
 	register nmea_err_t err;
 
 	//  Seek to the first data field -- time
@@ -261,7 +261,7 @@ nmea_err_t GPS_Parser::parse_rmc(char* nmea, uint8_t len) {
 	return nmea_success;
 }
 
-nmea_err_t GPS_Parser::parse_coord(char** nmea) {
+nmea_err_t NMEA_Parser::parse_coord(char** nmea) {
 	int32_t tmp = 0;
 
 	//  I cannot explain this for the LIFE of me. This is the minimum delay
@@ -297,7 +297,7 @@ nmea_err_t GPS_Parser::parse_coord(char** nmea) {
 	return nmea_success;
 }
 
-nmea_err_t GPS_Parser::parse_date(char* nmea) {
+nmea_err_t NMEA_Parser::parse_date(char* nmea) {
 	register uint8_t tmp;
 
 	tmp  = (nmea[1] - '0') * 10;
@@ -330,7 +330,7 @@ nmea_err_t GPS_Parser::parse_date(char* nmea) {
 	return nmea_success;
 }
 
-nmea_err_t GPS_Parser::parse_time(char* nmea) {
+nmea_err_t NMEA_Parser::parse_time(char* nmea) {
 	register uint8_t tmp;
 
 	tmp  = (nmea[1] - '0') * 10;
@@ -374,7 +374,7 @@ nmea_err_t GPS_Parser::parse_time(char* nmea) {
 	return nmea_success;
 }
 
-nmea_err_t GPS_Parser::parse_double(char* nmea, double* store) {
+nmea_err_t NMEA_Parser::parse_double(char* nmea, double* store) {
 	*store = 0.0;
 	register uint8_t fracs = 0;
 	register bool in_fracs = false;
