@@ -28,6 +28,8 @@ public:
 	nmea_err_t parse(char* nmea, uint8_t len = 0);
 
 	nmea_timestamp_t timestamp(void);
+	bool fix(void);
+
 #ifdef ARDUINO
 	void print_info(void);
 #endif
@@ -41,7 +43,9 @@ protected:
 	virtual nmea_err_t parse_rmc(char* nmea, uint8_t len);
 
 	virtual nmea_err_t parse_time(char* nmea);
+
 	nmea_timestamp_t _timestamp;
+	bool _fix;
 };
 
 #endif//__MYRRLYN_GPS_PARSER_H

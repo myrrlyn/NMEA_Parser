@@ -237,3 +237,4 @@ Recommended Minimum Coordinates.
 - `$GPRMC` &ndash; Header and identifier.
 - `/[0-9]{6}/` &ndash; Time in UTC. GPS time is offset from UTC, and the GPS
 signals include this offset for the receiver to calculate UTC time.
+- `/[AV]/` &ndash; Fix status. A for Active, V for Void.

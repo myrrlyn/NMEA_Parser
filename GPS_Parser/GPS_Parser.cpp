@@ -12,6 +12,7 @@ GPS_Parser::GPS_Parser() {
 		.second = 0,
 		.millisecond = 0,
 	};
+	_fix = false;
 }
 
 nmea_err_t GPS_Parser::parse(char* nmea, uint8_t len) {
@@ -38,6 +39,10 @@ nmea_timestamp_t GPS_Parser::timestamp() {
 	return _timestamp;
 }
 
+bool GPS_Parser::fix() {
+	return _fix;
+}
+
 #ifdef ARDUINO
 void GPS_Parser::print_info() {
 	Serial.print("Timestamp: ");
@@ -55,6 +60,8 @@ void GPS_Parser::print_info() {
 	Serial.print('.');
 	Serial.print(_timestamp.millisecond);
 	Serial.println('Z');
+	Serial.print("Fix status: ");
+	Serial.println(_fix ? "Acquired" : "Void");
 }
 #endif
 
@@ -121,6 +128,21 @@ nmea_err_t GPS_Parser::parse_rmc(char* nmea, uint8_t len) {
 	err = parse_time(nmea);
 	if (err != nmea_success) {
 		return err;
+	}
+
+	//  Seek to the second data field -- state
+	nmea = strchr(++nmea, ',');
+	if (nmea == NULL) {
+		return nmea_err_baddata;
+	}
+	if (nmea[1] == 'A') {
+		_fix = true;
+	}
+	else if (nmea[1] == 'V') {
+		_fix = false;
+	}
+	else {
+		return nmea_err_baddata;
 	}
 
 	return nmea_success;
