@@ -21,6 +21,7 @@ NMEA_Parser::NMEA_Parser() :
 		.heading = 0.0,
 	}),
 	_magvar(0.0),
+	_fix_quality(nmea_fix_invalid),
 	_fix(false) {
 }
 
@@ -60,6 +61,10 @@ nmea_magvar_t NMEA_Parser::magnetic_variation() {
 	return _magvar;
 }
 
+nmea_fix_quality_t NMEA_Parser::fix_quality() {
+	return _fix_quality;
+}
+
 bool NMEA_Parser::fix() {
 	return _fix;
 }
@@ -81,8 +86,10 @@ void NMEA_Parser::print_info() {
 	Serial.print('.');
 	Serial.print(_timestamp.millisecond);
 	Serial.println('Z');
-	Serial.print("Fix status: ");
+	Serial.print("Fix Status: ");
 	Serial.println(_fix ? "Acquired" : "Void");
+	Serial.print("Fix Quality: ");
+	Serial.println((uint8_t)_fix_quality);
 	Serial.print("Location: ");
 	Serial.print((double)_coordinates.latitude / 100.0);
 	Serial.print(", ");
@@ -183,6 +190,23 @@ nmea_err_t NMEA_Parser::parse_gga(char* nmea, uint8_t len) {
 	err = parse_coord(&nmea);
 	if (err != nmea_success) {
 		return err;
+	}
+
+	//  Seek to the sixth data field -- fix quality
+	nmea = strchr(++nmea, ',');
+	if (nmea == NULL) {
+		return nmea_err_baddata;
+	}
+	switch (nmea[1]) {
+		case '0':
+		case '1':
+		case '2':
+			//  Fallthroughs are intentional
+			_fix_quality = (nmea_fix_quality_t)(nmea[1] - '0');
+			break;
+		case ',':
+		default:
+			return nmea_err_baddata;
 	}
 
 	return nmea_success;

@@ -37,6 +37,12 @@ typedef struct {
 	double heading;
 } nmea_velocity_t;
 
+typedef enum : uint8_t {
+	nmea_fix_invalid = 0,
+	nmea_fix_normal  = 1,
+	nmea_fix_dgps    = 2,
+} nmea_fix_quality_t;
+
 class NMEA_Parser {
 public:
 	NMEA_Parser(void);
@@ -46,6 +52,7 @@ public:
 	nmea_timestamp_t timestamp(void);
 	nmea_velocity_t velocity(void);
 	nmea_magvar_t magnetic_variation(void);
+	nmea_fix_quality_t fix_quality(void);
 	bool fix(void);
 
 #ifdef ARDUINO
@@ -70,6 +77,7 @@ protected:
 	nmea_timestamp_t _timestamp;
 	nmea_velocity_t _velocity;
 	nmea_magvar_t _magvar;
+	nmea_fix_quality_t _fix_quality;
 	bool _fix;
 };
 
