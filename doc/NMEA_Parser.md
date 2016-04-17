@@ -219,6 +219,17 @@ sentences with no checksum to be permitted.
 
 The sentence-type parsers will fail if any of their internal sections fail.
 
+Sentence parsers will only update the instance variables for fields that they
+actually contain. A parser will not destroy information that it cannot replace.
+
+##### GGA Parser
+
+```cpp
+virtual nmea_err_t NMEA_Parser::parse_gga(char* nmea, uint8_t len);
+```
+
+Parses a GGA-type NMEA sentence and stores the payload in the instance fields.
+
 ##### RMC Parser
 
 ```cpp

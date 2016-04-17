@@ -121,6 +121,9 @@ uint8_t NMEA_Parser::parse_hex(char h, char l) {
 //  Protected
 
 nmea_err_t NMEA_Parser::delegate_parse(char* nmea, uint8_t len) {
+	if (strstr(nmea, "$GPGGA")) {
+		return parse_gga(nmea, len);
+	}
 	if (strstr(nmea, "$GPRMC")) {
 		return parse_rmc(nmea, len);
 	}
@@ -147,6 +150,12 @@ nmea_err_t NMEA_Parser::validate_checksum(char* nmea, uint8_t len) {
 		return nmea_success;
 	}
 	return nmea_err_nocsum;
+}
+
+nmea_err_t NMEA_Parser::parse_gga(char* nmea, uint8_t len) {
+	register nmea_err_t err;
+
+	return nmea_success;
 }
 
 nmea_err_t NMEA_Parser::parse_rmc(char* nmea, uint8_t len) {

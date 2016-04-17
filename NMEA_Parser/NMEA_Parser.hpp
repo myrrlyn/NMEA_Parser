@@ -58,6 +58,7 @@ protected:
 	virtual nmea_err_t delegate_parse(char* nmea, uint8_t len = 0);
 	virtual nmea_err_t validate_checksum(char* nmea, uint8_t len);
 
+	virtual nmea_err_t parse_gga(char* nmea, uint8_t len);
 	virtual nmea_err_t parse_rmc(char* nmea, uint8_t len);
 
 	virtual nmea_err_t parse_coord(char** nmea);
