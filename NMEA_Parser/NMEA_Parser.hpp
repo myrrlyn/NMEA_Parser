@@ -30,12 +30,12 @@ typedef struct {
 	uint16_t millisecond;
 } nmea_timestamp_t;
 
-typedef double nmea_magvar_t;
-
 typedef struct {
 	double speed;
 	double heading;
 } nmea_velocity_t;
+
+typedef double nmea_magvar_t;
 
 typedef enum : uint8_t {
 	nmea_fix_invalid = 0,
@@ -48,8 +48,9 @@ public:
 	NMEA_Parser(void);
 	nmea_err_t parse(char* nmea, uint8_t len = 0);
 
-	nmea_coord_t coordinates(void);
 	nmea_timestamp_t timestamp(void);
+	nmea_coord_t coordinates(void);
+	double altitude(char ref = 's');
 	nmea_velocity_t velocity(void);
 	double hdop(void);
 	nmea_magvar_t magnetic_variation(void);
@@ -76,8 +77,10 @@ protected:
 	virtual nmea_err_t parse_int(char* nmea, uint8_t* store);
 	virtual nmea_err_t parse_double(char* nmea, double* store);
 
-	nmea_coord_t _coordinates;
 	nmea_timestamp_t _timestamp;
+	nmea_coord_t _coordinates;
+	double _alt_sea;
+	double _alt_wgs;
 	nmea_velocity_t _velocity;
 	double _hdop;
 	nmea_magvar_t _magvar;

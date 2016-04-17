@@ -16,6 +16,8 @@ NMEA_Parser::NMEA_Parser() :
 		.second = 0,
 		.millisecond = 0,
 	}),
+	_alt_sea(0.0),
+	_alt_wgs(0.0),
 	_velocity({
 		.speed = 0.0,
 		.heading = 0.0,
@@ -106,6 +108,10 @@ void NMEA_Parser::print_info() {
 	Serial.print((double)_coordinates.latitude / 100.0);
 	Serial.print(", ");
 	Serial.println((double)_coordinates.longitude / 100.0);
+	Serial.print("Altitude (sea level): ");
+	Serial.println(_alt_sea);
+	Serial.print("Altitude (WGS84):     ");
+	Serial.println(_alt_wgs);
 	Serial.print("Horizontal Dilution of Precision: ");
 	Serial.println(_hdop);
 	Serial.print("Velocity: ");
@@ -239,6 +245,26 @@ nmea_err_t NMEA_Parser::parse_gga(char* nmea, uint8_t len) {
 		return nmea_err_baddata;
 	}
 	err = parse_double(nmea, &_hdop);
+	if (err != nmea_success) {
+		return err;
+	}
+
+	//  Seek to the ninth data field -- altitude from sea level
+	nmea = strchr(++nmea, ',');
+	if (nmea == NULL) {
+		return nmea_err_baddata;
+	}
+	err = parse_double(nmea, &_alt_sea);
+	if (err != nmea_success) {
+		return err;
+	}
+
+	//  Seek to the tenth data field -- altitude from WGS84 datum
+	nmea = strchr(++nmea, ',');
+	if (nmea == NULL) {
+		return nmea_err_baddata;
+	}
+	err = parse_double(nmea, &_alt_wgs);
 	if (err != nmea_success) {
 		return err;
 	}

@@ -93,10 +93,16 @@ nmea_coord_t NMEA_Parser::coordinates(void);
 ```
 
 ##### Timestamp
+##### Altitudes
 
 ```cpp
 nmea_timestamp_t NMEA_Parser::timestamp(void);
+nmea_coord_t NMEA_Parser::altitude(char ref = 's');
 ```
+
+There are two reference levels for altitude: sea level and the WGS84 canonical
+spheroid. Call with `'s'` for the sea level altitude (default) or with `'w'` for
+the height difference from WGS84.
 
 ##### Velocity
 
