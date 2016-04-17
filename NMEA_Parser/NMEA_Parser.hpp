@@ -1,7 +1,9 @@
-#ifndef __MYRRLYN_GPS_PARSER_H
-#define __MYRRLYN_GPS_PARSER_H
+#ifndef __MYRRLYN_NMEA_PARSER_H
+#define __MYRRLYN_NMEA_PARSER_H
 
 #include <stdint.h>
+
+#define __MYRRLYN_NMEA_PARSER_VERSION "0.1.0"
 
 typedef enum : uint8_t {
 	nmea_success     = 0x00,
@@ -35,9 +37,9 @@ typedef struct {
 	double heading;
 } nmea_velocity_t;
 
-class GPS_Parser {
+class NMEA_Parser {
 public:
-	GPS_Parser(void);
+	NMEA_Parser(void);
 	nmea_err_t parse(char* nmea, uint8_t len = 0);
 
 	nmea_coord_t coordinates(void);
@@ -70,4 +72,4 @@ protected:
 	bool _fix;
 };
 
-#endif//__MYRRLYN_GPS_PARSER_H
+#endif//__MYRRLYN_NMEA_PARSER_H

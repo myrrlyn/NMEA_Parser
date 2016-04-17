@@ -1,4 +1,4 @@
-# GPS Parsing
+# NMEA Sentence Parsing
 
 This library provides stateful parsing of NMEA sentences.
 
@@ -65,7 +65,7 @@ failure. When absent, its value will be marked 0.
 #### Constructor
 
 ```cpp
-GPS_Parser::GPS_Parser(void);
+NMEA_Parser::NMEA_Parser(void);
 ```
 
 Constructs a new GPS Parser instance and initializes instance data fields to 0.
@@ -73,7 +73,7 @@ Constructs a new GPS Parser instance and initializes instance data fields to 0.
 #### Parser
 
 ```cpp
-nmea_err_t GPS_Parser::parse(char* nmea, uint8_t len = 0);
+nmea_err_t NMEA_Parser::parse(char* nmea, uint8_t len = 0);
 ```
 
 Public interface for parsing NMEA sentences. Checks for NULL pointers and valid
@@ -89,37 +89,37 @@ These methods return copies of the indicated data field.
 ##### Coordinates
 
 ```cpp
-nmea_coord_t GPS_Parser::coordinates(void);
+nmea_coord_t NMEA_Parser::coordinates(void);
 ```
 
 ##### Timestamp
 
 ```cpp
-nmea_timestamp_t GPS_Parser::timestamp(void);
+nmea_timestamp_t NMEA_Parser::timestamp(void);
 ```
 
 ##### Velocity
 
 ```cpp
-nmea_velocity_t GPS_Parser::velocity(void);
+nmea_velocity_t NMEA_Parser::velocity(void);
 ```
 
 ##### Magnetic Variation
 
 ```cpp
-nmea_magvar_t GPS_Parser::magnetic_variation(void);
+nmea_magvar_t NMEA_Parser::magnetic_variation(void);
 ```
 
 ##### Fix Status
 
 ```cpp
-bool GPS_Parser::fix(void);
+bool NMEA_Parser::fix(void);
 ```
 
 #### Printer
 
 ```cpp
-void GPS_Parser::print_info(void);
+void NMEA_Parser::print_info(void);
 ```
 
 Prints the full contents of the parser's current storage to main Serial line.
@@ -158,7 +158,7 @@ the base class to use the base parsers.
 Example Override:
 
 ```cpp
-class Custom_Parser : public GPS_Parser {
+class Custom_Parser : public NMEA_Parser {
 protected:
     nmea_err_t delegate_parse(char* nmea, uint8_t len);
 private:
@@ -176,23 +176,23 @@ nmea_err_t Custom_Parser::delegate_parse(char* nmea, uint8_t len) {
     }
     //  Give up and let the parent handle it
     else {
-        return GPS_Parser::delegate_parse(nmea, len);
+        return NMEA_Parser::delegate_parse(nmea, len);
     }
 }
 
-GPS_Parser demoer;
+NMEA_Parser demoer;
 Custom_Parser example;
 
 demoer.parse("$GPRMC,data*cs");
-//  - GPS_Parser::delegate_parse
-//  -- GPS_Parser::parse_rmc
+//  - NMEA_Parser::delegate_parse
+//  -- NMEA_Parser::parse_rmc
 demoer.parse("$GPwhatever,data*cs");
-//  - GPS_Parser::delegate_parse
+//  - NMEA_Parser::delegate_parse
 //  FAILS
 example.parse("$GPRMC,data*cs");
 //  - Custom_Parser::delegate_parse
-//  -- GPS_Parser::delegate_parse
-//  --- GPS_Parser::parse_rmc
+//  -- NMEA_Parser::delegate_parse
+//  --- NMEA_Parser::parse_rmc
 example.parse("$GPwhatever,data*cs");
 //  - Custom_Parser::delegate_parse
 //  -- Custom_Parser::parse_some_type
@@ -222,7 +222,7 @@ The sentence-type parsers will fail if any of their internal sections fail.
 ##### RMC Parser
 
 ```cpp
-virtual nmea_err_t GPS_Parser::parse_rmc(char* nmea, uint8_t len);
+virtual nmea_err_t NMEA_Parser::parse_rmc(char* nmea, uint8_t len);
 ```
 
 Parses an RMC-type NMEA sentence and stores the payload in the instance fields.
@@ -245,7 +245,7 @@ beginning an appropriate data field, or if the contained data is invalid.
 ##### Coordinate Parser
 
 ```cpp
-virtual nmea_err_t GPS_Parser::parse_coord(char** nmea);
+virtual nmea_err_t NMEA_Parser::parse_coord(char** nmea);
 ```
 
 Parses a coordinate value out of an NMEA sentence. This function takes the
@@ -268,8 +268,8 @@ Coordinates look like this:
 ##### Timestamp Parsers
 
 ```cpp
-virtual nmea_err_t GPS_Parser::parse_date(char* nmea);
-virtual nmea_err_t GPS_Parser::parse_time(char* nmea);
+virtual nmea_err_t NMEA_Parser::parse_date(char* nmea);
+virtual nmea_err_t NMEA_Parser::parse_time(char* nmea);
 ```
 
 Reads the timestamp out of an NMEA fragment and stores the data.
@@ -277,7 +277,7 @@ Reads the timestamp out of an NMEA fragment and stores the data.
 ##### Numeric Parser
 
 ```cpp
-virtual nmea_err_t GPS_Parser::parse_double(char* nmea);
+virtual nmea_err_t NMEA_Parser::parse_double(char* nmea);
 ```
 
 ### Public Static Methods
@@ -294,14 +294,14 @@ Characters `0` through `9` return those numbers. Characters `A` through `F` and
 `a` through `f` return 10 through 15. Other characters return 0.
 
 ```cpp
-static uint8_t GPS_Parser::parse_hex(char c);
+static uint8_t NMEA_Parser::parse_hex(char c);
 ```
 
 Parses a single ASCII character as a hexadecimal digit and returns the number it
 represents.
 
 ```cpp
-static uint8_t GPS_Parser::parse_hex(char h, char l);
+static uint8_t NMEA_Parser::parse_hex(char h, char l);
 ```
 
 Parses two ASCII characters as hexadecimal digits and returns the number they

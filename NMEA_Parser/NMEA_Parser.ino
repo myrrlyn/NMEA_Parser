@@ -1,6 +1,6 @@
-#include "GPS_Parser.hpp"
+#include "NMEA_Parser.hpp"
 
-GPS_Parser demo;
+NMEA_Parser demo;
 nmea_err_t err;
 bool result = true;
 
