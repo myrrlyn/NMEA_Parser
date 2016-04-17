@@ -21,6 +21,7 @@ NMEA_Parser::NMEA_Parser() :
 		.heading = 0.0,
 	}),
 	_magvar(0.0),
+	_satellites_visible(0),
 	_fix_quality(nmea_fix_invalid),
 	_fix(false) {
 }
@@ -61,6 +62,10 @@ nmea_magvar_t NMEA_Parser::magnetic_variation() {
 	return _magvar;
 }
 
+uint8_t NMEA_Parser::satellites() {
+	return _satellites_visible;
+}
+
 nmea_fix_quality_t NMEA_Parser::fix_quality() {
 	return _fix_quality;
 }
@@ -86,6 +91,8 @@ void NMEA_Parser::print_info() {
 	Serial.print('.');
 	Serial.print(_timestamp.millisecond);
 	Serial.println('Z');
+	Serial.print("Satellites in View: ");
+	Serial.println(_satellites_visible);
 	Serial.print("Fix Status: ");
 	Serial.println(_fix ? "Acquired" : "Void");
 	Serial.print("Fix Quality: ");
@@ -208,6 +215,18 @@ nmea_err_t NMEA_Parser::parse_gga(char* nmea, uint8_t len) {
 		default:
 			return nmea_err_baddata;
 	}
+
+	//  Seek to the seventh data field -- satellite count
+	nmea = strchr(++nmea, ',');
+	if (nmea == NULL) {
+		return nmea_err_baddata;
+	}
+	err = parse_int(nmea, &_satellites_visible);
+	if (err != nmea_success) {
+		return err;
+	}
+
+	Serial.println(nmea);
 
 	return nmea_success;
 }
@@ -434,6 +453,18 @@ nmea_err_t NMEA_Parser::parse_time(char* nmea) {
 		return nmea_err_baddata;
 	}
 
+	return nmea_success;
+}
+
+nmea_err_t NMEA_Parser::parse_int(char* nmea, uint8_t* store) {
+	*store = 0;
+	if (nmea[1] == ',') {
+		return nmea_err_baddata;
+	}
+	for (uint8_t idx = 1; nmea[idx] >= '0' && nmea[idx] <= '9'; ++idx) {
+		*store *= 10;
+		*store += (nmea[idx] - '0');
+	}
 	return nmea_success;
 }
 

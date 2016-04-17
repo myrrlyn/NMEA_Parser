@@ -52,6 +52,7 @@ public:
 	nmea_timestamp_t timestamp(void);
 	nmea_velocity_t velocity(void);
 	nmea_magvar_t magnetic_variation(void);
+	uint8_t satellites(void);
 	nmea_fix_quality_t fix_quality(void);
 	bool fix(void);
 
@@ -71,12 +72,14 @@ protected:
 	virtual nmea_err_t parse_coord(char** nmea);
 	virtual nmea_err_t parse_date(char* nmea);
 	virtual nmea_err_t parse_time(char* nmea);
+	virtual nmea_err_t parse_int(char* nmea, uint8_t* store);
 	virtual nmea_err_t parse_double(char* nmea, double* store);
 
 	nmea_coord_t _coordinates;
 	nmea_timestamp_t _timestamp;
 	nmea_velocity_t _velocity;
 	nmea_magvar_t _magvar;
+	uint8_t _satellites_visible;
 	nmea_fix_quality_t _fix_quality;
 	bool _fix;
 };

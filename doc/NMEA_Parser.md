@@ -110,9 +110,16 @@ nmea_velocity_t NMEA_Parser::velocity(void);
 nmea_magvar_t NMEA_Parser::magnetic_variation(void);
 ```
 
-##### Fix Status
+##### Satellite Counts
 
 ```cpp
+uint8_t NMEA_Parser::satellites(void);
+```
+
+##### Fix Information
+
+```cpp
+nmea_fix_quality_t NMEA_Parser::fix_quality(void);
 bool NMEA_Parser::fix(void);
 ```
 
@@ -288,7 +295,8 @@ Reads the timestamp out of an NMEA fragment and stores the data.
 ##### Numeric Parser
 
 ```cpp
-virtual nmea_err_t NMEA_Parser::parse_double(char* nmea);
+virtual nmea_err_t NMEA_Parser::parse_int(char* nmea, uint8_t* store);
+virtual nmea_err_t NMEA_Parser::parse_double(char* nmea, double* store);
 ```
 
 ### Public Static Methods
