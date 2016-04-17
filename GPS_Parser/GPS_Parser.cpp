@@ -16,6 +16,10 @@ GPS_Parser::GPS_Parser() :
 		.second = 0,
 		.millisecond = 0,
 	}),
+	_velocity({
+		.speed = 0.0,
+		.heading = 0.0,
+	}),
 	_fix(false) {
 }
 
@@ -47,6 +51,10 @@ nmea_timestamp_t GPS_Parser::timestamp() {
 	return _timestamp;
 }
 
+nmea_velocity_t GPS_Parser::velocity() {
+	return _velocity;
+}
+
 bool GPS_Parser::fix() {
 	return _fix;
 }
@@ -74,6 +82,11 @@ void GPS_Parser::print_info() {
 	Serial.print((double)_coordinates.latitude / 100.0);
 	Serial.print(", ");
 	Serial.println((double)_coordinates.longitude / 100.0);
+	Serial.print("Velocity: ");
+	Serial.print(_velocity.speed);
+	Serial.print(" knots at ");
+	Serial.print(_velocity.heading);
+	Serial.println(" degrees true");
 }
 #endif
 
@@ -176,6 +189,26 @@ nmea_err_t GPS_Parser::parse_rmc(char* nmea, uint8_t len) {
 		return err;
 	}
 
+	//  Seek to the seventh data field -- speed
+	nmea = strchr(++nmea, ',');
+	if (nmea == NULL) {
+		return nmea_err_baddata;
+	}
+	err = parse_double(nmea, &_velocity.speed);
+	if (err != nmea_success) {
+		return err;
+	}
+
+	//  Seek to the eighth data field -- heading
+	nmea = strchr(++nmea, ',');
+	if (nmea == NULL) {
+		return nmea_err_baddata;
+	}
+	err = parse_double(nmea, &_velocity.heading);
+	if (err != nmea_success) {
+		return err;
+	}
+
 	return nmea_success;
 }
 
@@ -259,3 +292,36 @@ nmea_err_t GPS_Parser::parse_time(char* nmea) {
 	return nmea_success;
 }
 
+nmea_err_t GPS_Parser::parse_double(char* nmea, double* store) {
+	*store = 0.0;
+	register uint8_t fracs = 0;
+	register bool in_fracs = false;
+	register bool sign = false;
+	if (nmea[1] == ',') {
+		return nmea_err_baddata;
+	}
+	for (uint8_t idx = 1; nmea[idx] != ','; ++idx) {
+		switch (nmea[idx]) {
+			case '.':
+				in_fracs = true;
+				continue;
+			case '-':
+				sign = !sign;
+				//  Intentional fallthrough
+			case '+':
+				continue;
+		}
+		*store *= 10.0;
+		*store += (double)(nmea[idx] - '0');
+		if (in_fracs) {
+			++fracs;
+		}
+	}
+	for (uint8_t idx = 0; idx < fracs; ++idx) {
+		*store /= 10.0;
+	}
+	if (sign) {
+		*store *= -1.0;
+	}
+	return nmea_success;
+}

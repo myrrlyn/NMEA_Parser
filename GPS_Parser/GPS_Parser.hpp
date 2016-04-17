@@ -27,6 +27,11 @@ typedef struct {
 	uint16_t millisecond;
 } nmea_timestamp_t;
 
+typedef struct {
+	double speed;
+	double heading;
+} nmea_velocity_t;
+
 class GPS_Parser {
 public:
 	GPS_Parser(void);
@@ -34,6 +39,7 @@ public:
 
 	nmea_coord_t coordinates(void);
 	nmea_timestamp_t timestamp(void);
+	nmea_velocity_t velocity(void);
 	bool fix(void);
 
 #ifdef ARDUINO
@@ -50,9 +56,11 @@ protected:
 
 	virtual nmea_err_t parse_coord(char** nmea);
 	virtual nmea_err_t parse_time(char* nmea);
+	virtual nmea_err_t parse_double(char* nmea, double* store);
 
 	nmea_coord_t _coordinates;
 	nmea_timestamp_t _timestamp;
+	nmea_velocity_t _velocity;
 	bool _fix;
 };
 

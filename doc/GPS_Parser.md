@@ -229,6 +229,12 @@ virtual nmea_err_t GPS_Parser::parse_time(char* nmea);
 
 Reads the timestamp out of an NMEA fragment and stores the data.
 
+##### Numeric Parser
+
+```cpp
+virtual nmea_err_t GPS_Parser::parse_double(char* nmea);
+```
+
 ### Public Static Methods
 
 The static methods are stateless and do not need an NMEA sentence or parser
