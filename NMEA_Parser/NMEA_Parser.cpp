@@ -3,10 +3,6 @@
 #include <Arduino.h>
 
 NMEA_Parser::NMEA_Parser() :
-	_coordinates({
-		.latitude  = 0,
-		.longitude = 0,
-	}),
 	_timestamp({
 		.year = 0,
 		.month = 0,
@@ -15,6 +11,10 @@ NMEA_Parser::NMEA_Parser() :
 		.minute = 0,
 		.second = 0,
 		.millisecond = 0,
+	}),
+	_coordinates({
+		.latitude  = 0,
+		.longitude = 0,
 	}),
 	_alt_sea(0.0),
 	_alt_wgs(0.0),

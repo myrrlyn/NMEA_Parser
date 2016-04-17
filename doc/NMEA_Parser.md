@@ -86,17 +86,21 @@ and where the failure occurred.
 
 These methods return copies of the indicated data field.
 
+##### Timestamp
+
+```cpp
+nmea_timestamp_t NMEA_Parser::timestamp(void);
+```
+
 ##### Coordinates
 
 ```cpp
 nmea_coord_t NMEA_Parser::coordinates(void);
 ```
 
-##### Timestamp
 ##### Altitudes
 
 ```cpp
-nmea_timestamp_t NMEA_Parser::timestamp(void);
 nmea_coord_t NMEA_Parser::altitude(char ref = 's');
 ```
 
