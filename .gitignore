@@ -1,5 +1,4 @@
 .pioenvs
-*.gch
 .clang_complete
 .gcc-flags.json
 *.gch
