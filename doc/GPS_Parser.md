@@ -43,6 +43,13 @@ Two digit year, month, day, hour, minute, and second values; three-digit
 millisecond value. Date values start from 1, time values start from 0. GPS time
 does **NOT** recognize leap seconds, so there is no second 60.
 
+##### `nmea_velocity_t`
+
+A structure with two `double`s, speed and heading.
+
+GPS modules can calculate apparent speed and heading using the most recently
+acquired coordinates. Speed is printed in knots; heading in degrees-from-true.
+
 ### Public Methods
 
 #### Constructor

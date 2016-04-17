@@ -16,12 +16,15 @@ void setup() {
 	Serial.println("Testing master parser...");
 	Serial.println();
 
+	//  Expect NULL pointer detection and abort
 	err = demo.parse(NULL);
 	result &= test(err, nmea_err_null);
 
+	//  Expect absent checksum and abort
 	err = demo.parse("$GPRMC,");
 	result &= test(err, nmea_err_nocsum);
 
+	//  Expect malformed checksum and abort
 	err = demo.parse("$GPRMC,*");
 	result &= test(err, nmea_err_badcsum);
 
@@ -31,8 +34,17 @@ void setup() {
 	err = demo.parse("$GPRMC,*00");
 	result &= test(err, nmea_err_badcsum);
 
+	//  Expect missing data and abort
+	err = demo.parse("$GPRMC,203826.123,V,,,,,,,160416,,,D*4E");
+	result &= test(err, nmea_err_nofix);
+
+	demo.print_info();
+
+	//  Expect success with all required fields
 	err = demo.parse("$GPRMC,203826.123,A,4137.8868,N,08500.4129,W,1.02,297.04,160416,,,D*77");
 	result &= test(err, nmea_success);
+
+	demo.print_info();
 
 	Serial.println();
 	Serial.println("--------------------");
@@ -53,8 +65,6 @@ void setup() {
 	//  Optional, satellites in view
 	err = demo.parse("$GPGSV,3,1,10,08,72,126,17,07,59,314,,27,51,059,20,09,47,223,*7F");
 	result &= test(err, nmea_err_unknown);
-
-	demo.print_info();
 }
 
 void loop() {
@@ -79,6 +89,12 @@ bool test(nmea_err_t err, nmea_err_t expected) {
 			case nmea_err_badcsum:
 				Serial.println("SUCCESS: Detected invalid checksum.");
 				break;
+			case nmea_err_baddata:
+				Serial.println("SUCCESS: Detected missing data fields.");
+				break;
+			case nmea_err_nofix:
+				Serial.println("SUCCESS: Detected lack of satellite fix.");
+				break;
 			default:
 				Serial.print("TEST FAILURE: Return code 0x");
 				Serial.print(err);
@@ -101,6 +117,12 @@ bool test(nmea_err_t err, nmea_err_t expected) {
 				break;
 			case nmea_err_badcsum:
 				Serial.println("ERROR: Failed to detect invalid checksum.");
+				break;
+			case nmea_err_baddata:
+				Serial.println("ERROR: Failed to detect missing data fields.");
+				break;
+			case nmea_err_nofix:
+				Serial.println("ERROR: Failed to detect lack of satellite fix");
 				break;
 			default:
 				Serial.print("TEST FAILURE: Return code 0x");

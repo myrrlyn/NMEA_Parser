@@ -165,6 +165,16 @@ nmea_err_t GPS_Parser::parse_rmc(char* nmea, uint8_t len) {
 	}
 	else if (nmea[1] == 'V') {
 		_fix = false;
+		//  Fast-forward to date
+		for (uint8_t idx = 0; idx < 7; ++idx) {
+			nmea = strchr(++nmea, ',');
+		}
+		err = parse_date(nmea);
+		if (err != nmea_success) {
+			return err;
+		}
+		//  Now that we've parsed the date, give up and report missing data
+		return nmea_err_nofix;
 	}
 	else {
 		return nmea_err_baddata;
@@ -209,6 +219,18 @@ nmea_err_t GPS_Parser::parse_rmc(char* nmea, uint8_t len) {
 		return err;
 	}
 
+	//  Seek to the ninth field -- date
+	nmea = strchr(++nmea, ',');
+	if (nmea == NULL) {
+		return nmea_err_baddata;
+	}
+	err = parse_date(nmea);
+	if (err != nmea_success) {
+		return err;
+	}
+
+	Serial.println(nmea);
+
 	return nmea_success;
 }
 
@@ -245,6 +267,39 @@ nmea_err_t GPS_Parser::parse_coord(char** nmea) {
 		case ',': //  Intentional fallthrough.
 		default: return nmea_err_baddata;
 	}
+	return nmea_success;
+}
+
+nmea_err_t GPS_Parser::parse_date(char* nmea) {
+	register uint8_t tmp;
+
+	tmp  = (nmea[1] - '0') * 10;
+	tmp += (nmea[2] - '0');
+	if (tmp > 0 && tmp < 32) {
+		_timestamp.day = tmp;
+	}
+	else {
+		return nmea_err_baddata;
+	}
+
+	tmp  = (nmea[3] - '0') * 10;
+	tmp += (nmea[4] - '0');
+	if (tmp > 0 && tmp < 13) {
+		_timestamp.month = tmp;
+	}
+	else {
+		return nmea_err_baddata;
+	}
+
+	tmp  = (nmea[5] - '0') * 10;
+	tmp += (nmea[6] - '0');
+	if (tmp > 0 && tmp < 100) {
+		_timestamp.year = tmp;
+	}
+	else {
+		return nmea_err_baddata;
+	}
+
 	return nmea_success;
 }
 

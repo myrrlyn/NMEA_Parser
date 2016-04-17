@@ -10,6 +10,7 @@ typedef enum : uint8_t {
 	nmea_err_nocsum  = 0xBE,
 	nmea_err_badcsum = 0xBD,
 	nmea_err_baddata = 0x9F,
+	nmea_err_nofix   = 0x9E,
 } nmea_err_t;
 
 typedef struct {
@@ -55,6 +56,7 @@ protected:
 	virtual nmea_err_t parse_rmc(char* nmea, uint8_t len);
 
 	virtual nmea_err_t parse_coord(char** nmea);
+	virtual nmea_err_t parse_date(char* nmea);
 	virtual nmea_err_t parse_time(char* nmea);
 	virtual nmea_err_t parse_double(char* nmea, double* store);
 
