@@ -13,6 +13,11 @@ typedef enum : uint8_t {
 } nmea_err_t;
 
 typedef struct {
+	int32_t latitude;
+	int32_t longitude;
+} nmea_coord_t;
+
+typedef struct {
 	uint8_t year;
 	uint8_t month;
 	uint8_t day;
@@ -27,6 +32,7 @@ public:
 	GPS_Parser(void);
 	nmea_err_t parse(char* nmea, uint8_t len = 0);
 
+	nmea_coord_t coordinates(void);
 	nmea_timestamp_t timestamp(void);
 	bool fix(void);
 
@@ -42,8 +48,10 @@ protected:
 
 	virtual nmea_err_t parse_rmc(char* nmea, uint8_t len);
 
+	virtual nmea_err_t parse_coord(char** nmea);
 	virtual nmea_err_t parse_time(char* nmea);
 
+	nmea_coord_t _coordinates;
 	nmea_timestamp_t _timestamp;
 	bool _fix;
 };

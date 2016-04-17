@@ -2,8 +2,12 @@
 
 #include <Arduino.h>
 
-GPS_Parser::GPS_Parser() {
-	_timestamp = {
+GPS_Parser::GPS_Parser() :
+	_coordinates({
+		.latitude  = 0,
+		.longitude = 0,
+	}),
+	_timestamp({
 		.year = 0,
 		.month = 0,
 		.day = 0,
@@ -11,8 +15,8 @@ GPS_Parser::GPS_Parser() {
 		.minute = 0,
 		.second = 0,
 		.millisecond = 0,
-	};
-	_fix = false;
+	}),
+	_fix(false) {
 }
 
 nmea_err_t GPS_Parser::parse(char* nmea, uint8_t len) {
@@ -33,6 +37,10 @@ nmea_err_t GPS_Parser::parse(char* nmea, uint8_t len) {
 	}
 
 	return delegate_parse(nmea, len);
+}
+
+nmea_coord_t GPS_Parser::coordinates() {
+	return _coordinates;
 }
 
 nmea_timestamp_t GPS_Parser::timestamp() {
@@ -62,6 +70,10 @@ void GPS_Parser::print_info() {
 	Serial.println('Z');
 	Serial.print("Fix status: ");
 	Serial.println(_fix ? "Acquired" : "Void");
+	Serial.print("Location: ");
+	Serial.print((double)_coordinates.latitude / 100.0);
+	Serial.print(", ");
+	Serial.println((double)_coordinates.longitude / 100.0);
 }
 #endif
 
@@ -145,6 +157,61 @@ nmea_err_t GPS_Parser::parse_rmc(char* nmea, uint8_t len) {
 		return nmea_err_baddata;
 	}
 
+	//  Seek to the third data field -- latitude
+	nmea = strchr(++nmea, ',');
+	if (nmea == NULL) {
+		return nmea_err_baddata;
+	}
+	err = parse_coord(&nmea);
+	if (err != nmea_success) {
+		return err;
+	}
+	//  Seek to the fifth data field -- longitude
+	nmea = strchr(++nmea, ',');
+	if (nmea == NULL) {
+		return nmea_err_baddata;
+	}
+	err = parse_coord(&nmea);
+	if (err != nmea_success) {
+		return err;
+	}
+
+	return nmea_success;
+}
+
+nmea_err_t GPS_Parser::parse_coord(char** nmea) {
+	int32_t tmp = 0;
+
+	//  I cannot explain this for the LIFE of me. This is the minimum delay
+	//  needed, on an Atmel AVR ATMega2560, for this parse to succeed.
+	//  I have no idea if it's different on different cores or why it's needed
+	//  in the first place, but without it, the coordinate parsing fails.
+#ifdef ARDUINO
+	delayMicroseconds(921);
+#endif
+	if (*nmea[1] == ',') {
+		return nmea_err_baddata;
+	}
+	for (uint8_t idx = 1; (*nmea)[idx] != ','; ++idx) {
+		if ((*nmea)[idx] == '.') {
+			continue;
+		}
+		if ((*nmea)[idx] < '0' || (*nmea)[idx] > '9') {
+			return nmea_err_baddata;
+		}
+		tmp *= (int32_t)10;
+		tmp += (int32_t)((*nmea)[idx] - '0');
+	}
+	//  Seek to the next data field, the hemisphere indicator.
+	*nmea = strchr(++(*nmea), ',');
+	switch ((*nmea)[1]) {
+		case 'N': _coordinates.latitude = tmp; break;
+		case 'E': _coordinates.longitude = tmp; break;
+		case 'S': _coordinates.latitude = -tmp; break;
+		case 'W': _coordinates.longitude = -tmp; break;
+		case ',': //  Intentional fallthrough.
+		default: return nmea_err_baddata;
+	}
 	return nmea_success;
 }
 

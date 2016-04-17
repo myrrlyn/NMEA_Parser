@@ -27,6 +27,14 @@ checksum footer.
 present, but does not match actual contents.
 6. `nmea_err_baddata` &ndash; Returned when a data field contains garbage.
 
+##### `nmea_coord_t`
+
+A struct of two `nmea_coord_u` unions; one for latitude and one for longitude.
+Altitude is stored in a separate variable.
+
+NMEA coordinates are given in the form DDMM.mmmm, with the fractional part being
+of minutes, NOT seconds.
+
 ##### `nmea_timestamp_t`
 
 Holds a timestamp as stated by NMEA sentences.
@@ -60,6 +68,12 @@ and where the failure occurred.
 #### Accessors
 
 These methods return copies of the indicated data field.
+
+##### Coordinates
+
+```cpp
+nmea_coord_t GPS_Parser::coordinates(void);
+```
 
 ##### Timestamp
 
@@ -183,6 +197,29 @@ Parses an RMC-type NMEA sentence and stores the payload in the instance fields.
 The data-field parsers will fail if their given pointer does not target the `,`
 beginning an appropriate data field, or if the contained data is invalid.
 
+##### Coordinate Parser
+
+```cpp
+virtual nmea_err_t GPS_Parser::parse_coord(char** nmea);
+```
+
+Parses a coordinate value out of an NMEA sentence. This function takes the
+*address of the pointer 'nmea'*, since it covers two data fields and thus shunts
+the value of the 'nmea' pointer internally.
+
+When the master `parse()` function is called, it takes as a parameter a COPY of
+the pointer to the start of the sentence buffer. `delegate_parse()` then COPIES
+this value again, and it is copied a third time as the parameter for whichever
+specific `parse_*()` function actually gets called. It is *perfectly* safe for
+`parse_coord` to manipulate that value, since it is several stack frames deep
+and it will not have adverse affects on the client.
+
+Coordinates look like this:
+
+```ruby
+/[0-9]{4}\.[0-9]{4},[NESW]/
+```
+
 ##### Timestamp Parsers
 
 ```cpp
@@ -238,3 +275,9 @@ Recommended Minimum Coordinates.
 - `/[0-9]{6}/` &ndash; Time in UTC. GPS time is offset from UTC, and the GPS
 signals include this offset for the receiver to calculate UTC time.
 - `/[AV]/` &ndash; Fix status. A for Active, V for Void.
+- `/[0-9]{4}\.[0-9]{4}/` - Latitude. Ranges from 0000.0000 to 9000.0000. Encoded
+in DDMM.mmmm format.
+- `/[NS]/` &ndash; Hemisphere. N for North, S for South. North is positive.
+- `/[0-9]{5}\.[0-9]{4}/` &ndash; Longitude. Ranges from 00000.0000 to
+18000.0000. Encoded in DDDMM.mmmm format.
+- `/[EW]/` &ndash; Hemisphere. E for East, W for West. East is positive.
