@@ -165,6 +165,26 @@ nmea_err_t NMEA_Parser::parse_gga(char* nmea, uint8_t len) {
 		return err;
 	}
 
+	//  Seek to the second data field -- latitude
+	nmea = strchr(++nmea, ',');
+	if (nmea == NULL) {
+		return nmea_err_baddata;
+	}
+	err = parse_coord(&nmea);
+	if (err != nmea_success) {
+		return err;
+	}
+
+	//  Seek to the fourth data field -- longitude
+	nmea = strchr(++nmea, ',');
+	if (nmea == NULL) {
+		return nmea_err_baddata;
+	}
+	err = parse_coord(&nmea);
+	if (err != nmea_success) {
+		return err;
+	}
+
 	return nmea_success;
 }
 
