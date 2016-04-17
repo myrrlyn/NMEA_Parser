@@ -21,12 +21,21 @@ each carry a subset of the possible data.
 2. `nmea_err_null` &ndash; Returned when the parser is passed a NULL pointer.
 3. `nmea_err_unknown` &ndash; Returned when the given string is not an NMEA
 sentence for which this library implements a parser.
-5. `nmea_err_nocsum` &ndash; Returned when the given string lacks a full
+4. `nmea_err_nocsum` &ndash; Returned when the given string lacks a full
 checksum footer.
-4. `nmea_err_badcsum` &ndash; Returned when the given string's checksum is
+5. `nmea_err_badcsum` &ndash; Returned when the given string's checksum is
 present, but does not match actual contents.
+6. `nmea_err_baddata` &ndash; Returned when a data field contains garbage.
 
-### Public Instance Methods
+##### `nmea_timestamp_t`
+
+Holds a timestamp as stated by NMEA sentences.
+
+Two digit year, month, day, hour, minute, and second values; three-digit
+millisecond value. Date values start from 1, time values start from 0. GPS time
+does **NOT** recognize leap seconds, so there is no second 60.
+
+### Public Methods
 
 #### Constructor
 
@@ -48,6 +57,16 @@ checksums, then passes the sentence on to the individual type parsers.
 This function can return at any time. The return code serves to indicate what
 and where the failure occurred.
 
+#### Accessors
+
+These methods return copies of the indicated data field.
+
+##### Timestamp
+
+```cpp
+nmea_timestamp_t GPS_Parser::timestamp(void);
+```
+
 #### Printer
 
 ```cpp
@@ -65,7 +84,10 @@ Future possibilities:
 printing.
 - Make versions for other frameworks, such as UNIX's standard streams.
 
-### Protected Instance Methods
+### Protected Methods
+
+These functions are all marked as virtual so that subclasses can modify them if
+needed, and have untouched functions call the correct version.
 
 #### Parse Multiplexer
 
@@ -127,6 +149,49 @@ example.parse("$GPwhatever,data*cs");
 //  -- Custom_Parser::parse_some_type
 ```
 
+#### Checksum Validator
+
+```cpp
+virtual  nmea_err_t validate_checksum(char* nmea, uint8_t len);
+```
+
+Validates an NMEA sentence against its checksum.
+
+Returns `nmea_err_nocsum` if the string does not include a checksum. Returns
+`nmea_err_badcsum` if the string includes, but does not match, a checksum.
+
+A checksum is an 8-bit hexadecimal number calculated by XOR-ing together all
+payload characters (those between `$` and `*` in the string).
+
+This is marked as virtual so that subclasses can alter it, such as permitting
+sentences with no checksum to be permitted.
+
+#### Sentence Parsers
+
+The sentence-type parsers will fail if any of their internal sections fail.
+
+##### RMC Parser
+
+```cpp
+virtual nmea_err_t GPS_Parser::parse_rmc(char* nmea, uint8_t len);
+```
+
+Parses an RMC-type NMEA sentence and stores the payload in the instance fields.
+
+#### Data Parsers
+
+The data-field parsers will fail if their given pointer does not target the `,`
+beginning an appropriate data field, or if the contained data is invalid.
+
+##### Timestamp Parsers
+
+```cpp
+virtual nmea_err_t GPS_Parser::parse_date(char* nmea);
+virtual nmea_err_t GPS_Parser::parse_time(char* nmea);
+```
+
+Reads the timestamp out of an NMEA fragment and stores the data.
+
 ### Public Static Methods
 
 The static methods are stateless and do not need an NMEA sentence or parser
@@ -155,21 +220,20 @@ Parses two ASCII characters as hexadecimal digits and returns the number they
 represent. The first argument, `h`, is the high digit and the second, `l`, is
 the low digit.
 
-### Protected Static Methods
+# Appendix
 
-#### Checksum Validator
+## NMEA Sentence Structures
 
-```cpp
-static nmea_err_t validate_checksum(char* nmea, uint8_t len);
-```
+NMEA sentences consist of an identifying header, data fields, and a checksum
+footer. Fields are separated by commas. Sentences always begin with a `$` before
+the header and a `*` before the two-digit checksum.
 
-Validates an NMEA sentence against its checksum.
+Modules may choose to end the sentences in `\r`, `\n` or `\r\n`.
 
-Returns `nmea_err_nocsum` if the string does not include a checksum. Returns
-`nmea_err_badcsum` if the string includes, but does not match, a checksum.
+### RMC
 
-A checksum is an 8-bit hexadecimal number calculated by XOR-ing together all
-payload characters (those between `$` and `*` in the string).
+Recommended Minimum Coordinates.
 
-This is marked as protected so that subclasses can alter it, such as permitting
-sentences with no checksum to be permitted.
+- `$GPRMC` &ndash; Header and identifier.
+- `/[0-9]{6}/` &ndash; Time in UTC. GPS time is offset from UTC, and the GPS
+signals include this offset for the receiver to calculate UTC time.

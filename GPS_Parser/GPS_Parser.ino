@@ -7,7 +7,7 @@ bool result = true;
 bool test(nmea_err_t err, nmea_err_t expected);
 
 void setup() {
-	Serial.begin(9600);
+	Serial.begin(115200);
 	delay(500);
 
 	Serial.println("Testbed online");
@@ -31,19 +31,19 @@ void setup() {
 	err = demo.parse("$GPRMC,*00");
 	result &= test(err, nmea_err_badcsum);
 
+	err = demo.parse("$GPRMC,203826.123,A,4137.8868,N,08500.4129,W,1.02,297.04,160416,,,D*77");
+	result &= test(err, nmea_success);
+
 	Serial.println();
 	Serial.println("--------------------");
 	Serial.println(result ? "TESTS SUCCEEDED" : "TESTS FAILED");
 	Serial.println("--------------------");
 	Serial.println();
 
-	err = demo.parse("$GPRMC,203826.000,A,4137.8868,N,08500.4129,W,1.02,297.04,160416,,,D*77");
+	err = demo.parse("$GPGGA,203827.123,4137.8873,N,08500.4143,W,2,05,1.37,308.3,M,-33.8,M,0000,0000*56");
 	result &= test(err, nmea_success);
 
-	err = demo.parse("$GPGGA,203827.000,4137.8873,N,08500.4143,W,2,05,1.37,308.3,M,-33.8,M,0000,0000*56");
-	result &= test(err, nmea_success);
-
-	err = demo.parse("$GPGLL,4137.8873,N,08500.4143,W,203827.000,A,D*48");
+	err = demo.parse("$GPGLL,4137.8873,N,08500.4143,W,203827.123,A,D*48");
 	result &= test(err, nmea_success);
 
 	//  Optional, satellites in active use
@@ -55,7 +55,6 @@ void setup() {
 	result &= test(err, nmea_err_unknown);
 
 	demo.print_info();
-
 }
 
 void loop() {
