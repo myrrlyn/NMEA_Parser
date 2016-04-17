@@ -104,6 +104,27 @@ nmea_timestamp_t NMEA_Parser::timestamp(void);
 nmea_velocity_t NMEA_Parser::velocity(void);
 ```
 
+##### Horizontal Dilution of Precision
+
+```cpp
+double NMEA_Parser::hdop(void);
+```
+
+The smaller, the better.
+
+- < 1.0 &ndash; IDEAL. The information received at this precision can be used
+for nigh-surgical levels of geographical positioning.
+- 1.0 <--> 2.0 &ndash; Excellent. Position measurements in this range are good
+enough for ~95% of uses.
+- 2.0 <--> 5.0 &ndash; Pretty good. This is the limit for most cartographic
+applications. Position measurements here are sufficient for navigation.
+- 5.0 <--> 10.0 &ndash; Acceptable. Measurements can be used for static
+positioning but should not be used for moving references. Try to improve
+environmental conditions, such as sky view.
+- 10.0 <--> 20.0 &ndash; Mediocre. Position measurements are very general.
+- > 20.0 &ndash; Imprecision is up to several hundred meters. Measurements
+should be discarded entirely.
+
 ##### Magnetic Variation
 
 ```cpp

@@ -20,6 +20,7 @@ NMEA_Parser::NMEA_Parser() :
 		.speed = 0.0,
 		.heading = 0.0,
 	}),
+	_hdop(0.0),
 	_magvar(0.0),
 	_satellites_visible(0),
 	_fix_quality(nmea_fix_invalid),
@@ -56,6 +57,10 @@ nmea_timestamp_t NMEA_Parser::timestamp() {
 
 nmea_velocity_t NMEA_Parser::velocity() {
 	return _velocity;
+}
+
+double NMEA_Parser::hdop() {
+	return _hdop;
 }
 
 nmea_magvar_t NMEA_Parser::magnetic_variation() {
@@ -101,6 +106,8 @@ void NMEA_Parser::print_info() {
 	Serial.print((double)_coordinates.latitude / 100.0);
 	Serial.print(", ");
 	Serial.println((double)_coordinates.longitude / 100.0);
+	Serial.print("Horizontal Dilution of Precision: ");
+	Serial.println(_hdop);
 	Serial.print("Velocity: ");
 	Serial.print(_velocity.speed);
 	Serial.print(" knots at ");
@@ -222,6 +229,16 @@ nmea_err_t NMEA_Parser::parse_gga(char* nmea, uint8_t len) {
 		return nmea_err_baddata;
 	}
 	err = parse_int(nmea, &_satellites_visible);
+	if (err != nmea_success) {
+		return err;
+	}
+
+	//  Seek to the eighth data field -- HDOP
+	nmea = strchr(++nmea, ',');
+	if (nmea == NULL) {
+		return nmea_err_baddata;
+	}
+	err = parse_double(nmea, &_hdop);
 	if (err != nmea_success) {
 		return err;
 	}
