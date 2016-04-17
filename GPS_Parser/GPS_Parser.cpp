@@ -20,6 +20,7 @@ GPS_Parser::GPS_Parser() :
 		.speed = 0.0,
 		.heading = 0.0,
 	}),
+	_magvar(0.0),
 	_fix(false) {
 }
 
@@ -55,6 +56,10 @@ nmea_velocity_t GPS_Parser::velocity() {
 	return _velocity;
 }
 
+nmea_magvar_t GPS_Parser::magnetic_variation() {
+	return _magvar;
+}
+
 bool GPS_Parser::fix() {
 	return _fix;
 }
@@ -87,6 +92,8 @@ void GPS_Parser::print_info() {
 	Serial.print(" knots at ");
 	Serial.print(_velocity.heading);
 	Serial.println(" degrees true");
+	Serial.print("Magnetic variation: ");
+	Serial.println(_magvar);
 }
 #endif
 
@@ -218,6 +225,12 @@ nmea_err_t GPS_Parser::parse_rmc(char* nmea, uint8_t len) {
 	if (err != nmea_success) {
 		return err;
 	}
+	/*
+	if (_velocity.heading >= 360.0) {
+		_velocity.heading = 0.0;
+		return nmea_err_baddata;
+	}
+	*/
 
 	//  Seek to the ninth field -- date
 	nmea = strchr(++nmea, ',');
@@ -229,7 +242,21 @@ nmea_err_t GPS_Parser::parse_rmc(char* nmea, uint8_t len) {
 		return err;
 	}
 
-	Serial.println(nmea);
+	//  Seek to the tenth field -- magnetic variation
+	nmea = strchr(++nmea, ',');
+	if (nmea == NULL) {
+		return nmea_success;
+	}
+	err = parse_double(nmea, &_magvar);
+	if (err == nmea_success) {
+		nmea = strchr(++nmea, ',');
+		if (nmea == NULL) {
+			return nmea_success;
+		}
+		if (nmea[1] == 'W') {
+			_magvar *= -1;
+		}
+	}
 
 	return nmea_success;
 }

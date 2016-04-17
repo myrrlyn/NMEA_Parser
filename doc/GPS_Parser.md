@@ -26,6 +26,8 @@ checksum footer.
 5. `nmea_err_badcsum` &ndash; Returned when the given string's checksum is
 present, but does not match actual contents.
 6. `nmea_err_baddata` &ndash; Returned when a data field contains garbage.
+7. `nmea_err_nofix` &ndash; Returned when a sentence is correct, but the GPS
+module does not have a satellite fix and thus has not provided all the fields.
 
 ##### `nmea_coord_t`
 
@@ -49,6 +51,14 @@ A structure with two `double`s, speed and heading.
 
 GPS modules can calculate apparent speed and heading using the most recently
 acquired coordinates. Speed is printed in knots; heading in degrees-from-true.
+
+##### `nmea_magvar_t`
+
+Alias for `double`. Holds the magnetic variation from true North in the current
+location.
+
+This is an optional field. Its absence from a sentence will not cause a parse
+failure. When absent, its value will be marked 0.
 
 ### Public Methods
 
@@ -86,6 +96,24 @@ nmea_coord_t GPS_Parser::coordinates(void);
 
 ```cpp
 nmea_timestamp_t GPS_Parser::timestamp(void);
+```
+
+##### Velocity
+
+```cpp
+nmea_velocity_t GPS_Parser::velocity(void);
+```
+
+##### Magnetic Variation
+
+```cpp
+nmea_magvar_t GPS_Parser::magnetic_variation(void);
+```
+
+##### Fix Status
+
+```cpp
+bool GPS_Parser::fix(void);
 ```
 
 #### Printer
@@ -199,6 +227,16 @@ virtual nmea_err_t GPS_Parser::parse_rmc(char* nmea, uint8_t len);
 
 Parses an RMC-type NMEA sentence and stores the payload in the instance fields.
 
+The RMC structure puts the time first and the date last, with the rest of the
+payload in between them. It is very possible for an RMC sentence to arrive with
+valid and present time and date fields, but missing the fix-derived fields. In
+these cases, the parser will provide time and date, and then return the no-fix
+signal to indicate that the date and time fields are correct, and the rest are
+no longer current and should not be used.
+
+If this situation occurs after a fix has been found and lost, the last values
+received will be held until updated.
+
 #### Data Parsers
 
 The data-field parsers will fail if their given pointer does not target the `,`
@@ -294,3 +332,8 @@ in DDMM.mmmm format.
 - `/[0-9]{5}\.[0-9]{4}/` &ndash; Longitude. Ranges from 00000.0000 to
 18000.0000. Encoded in DDDMM.mmmm format.
 - `/[EW]/` &ndash; Hemisphere. E for East, W for West. East is positive.
+- `/[0-9]+\.[0-9]{2}/` &ndash; Speed in knots.
+- `/[0-9]+\.[0-9]{2}/` &ndash; Heading in degrees from true North.
+- `/[0-9]{6}/` &ndash; Date in DDMMYY.
+- `/([0-9]+\.[0-9]{2})?/` &ndash; Magnetic variation strength.
+- `/[EW]?/` &ndash; Magnetic variation direction.

@@ -28,6 +28,8 @@ typedef struct {
 	uint16_t millisecond;
 } nmea_timestamp_t;
 
+typedef double nmea_magvar_t;
+
 typedef struct {
 	double speed;
 	double heading;
@@ -41,6 +43,7 @@ public:
 	nmea_coord_t coordinates(void);
 	nmea_timestamp_t timestamp(void);
 	nmea_velocity_t velocity(void);
+	nmea_magvar_t magnetic_variation(void);
 	bool fix(void);
 
 #ifdef ARDUINO
@@ -63,6 +66,7 @@ protected:
 	nmea_coord_t _coordinates;
 	nmea_timestamp_t _timestamp;
 	nmea_velocity_t _velocity;
+	nmea_magvar_t _magvar;
 	bool _fix;
 };
 

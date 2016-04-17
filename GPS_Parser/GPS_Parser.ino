@@ -46,6 +46,12 @@ void setup() {
 
 	demo.print_info();
 
+	//  Expect success with optional fields
+	err = demo.parse("$GPRMC,203826.123,A,4137.8868,N,08500.4129,W,1.02,297.04,160416,0.01,W,D*3F");
+	result &= test(err, nmea_success);
+
+	demo.print_info();
+
 	Serial.println();
 	Serial.println("--------------------");
 	Serial.println(result ? "TESTS SUCCEEDED" : "TESTS FAILED");
