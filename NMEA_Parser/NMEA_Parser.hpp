@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#define __MYRRLYN_NMEA_PARSER_VERSION "0.2.0"
+#define __MYRRLYN_NMEA_PARSER_VERSION "0.3.0"
 
 typedef enum : uint8_t {
 	nmea_success     = 0x00,
@@ -75,6 +75,7 @@ protected:
 	virtual nmea_err_t validate_checksum(char* nmea, uint8_t len);
 
 	virtual nmea_err_t parse_gga(char* nmea, uint8_t len);
+	virtual nmea_err_t parse_gll(char* nmea, uint8_t len);
 	virtual nmea_err_t parse_rmc(char* nmea, uint8_t len);
 
 	virtual nmea_err_t parse_coord(char** nmea);

@@ -165,6 +165,9 @@ nmea_err_t NMEA_Parser::delegate_parse(char* nmea, uint8_t len) {
 	if (strstr(nmea, "$GPGGA")) {
 		return parse_gga(nmea, len);
 	}
+	if (strstr(nmea, "$GPGLL")) {
+		return parse_gll(nmea, len);
+	}
 	if (strstr(nmea, "$GPRMC")) {
 		return parse_rmc(nmea, len);
 	}
@@ -197,7 +200,7 @@ nmea_err_t NMEA_Parser::parse_gga(char* nmea, uint8_t len) {
 	register nmea_err_t err;
 
 	//  Seek to the first data field -- time
-	nmea = strchr(++nmea, ',');
+	nmea = strchr(&nmea[1], ',');
 	if (nmea == NULL) {
 		return nmea_err_baddata;
 	}
@@ -207,7 +210,7 @@ nmea_err_t NMEA_Parser::parse_gga(char* nmea, uint8_t len) {
 	}
 
 	//  Seek to the second data field -- latitude
-	nmea = strchr(++nmea, ',');
+	nmea = strchr(&nmea[1], ',');
 	if (nmea == NULL) {
 		return nmea_err_baddata;
 	}
@@ -217,7 +220,7 @@ nmea_err_t NMEA_Parser::parse_gga(char* nmea, uint8_t len) {
 	}
 
 	//  Seek to the fourth data field -- longitude
-	nmea = strchr(++nmea, ',');
+	nmea = strchr(&nmea[1], ',');
 	if (nmea == NULL) {
 		return nmea_err_baddata;
 	}
@@ -227,7 +230,7 @@ nmea_err_t NMEA_Parser::parse_gga(char* nmea, uint8_t len) {
 	}
 
 	//  Seek to the sixth data field -- fix quality
-	nmea = strchr(++nmea, ',');
+	nmea = strchr(&nmea[1], ',');
 	if (nmea == NULL) {
 		return nmea_err_baddata;
 	}
@@ -244,7 +247,7 @@ nmea_err_t NMEA_Parser::parse_gga(char* nmea, uint8_t len) {
 	}
 
 	//  Seek to the seventh data field -- satellite count
-	nmea = strchr(++nmea, ',');
+	nmea = strchr(&nmea[1], ',');
 	if (nmea == NULL) {
 		return nmea_err_baddata;
 	}
@@ -254,7 +257,7 @@ nmea_err_t NMEA_Parser::parse_gga(char* nmea, uint8_t len) {
 	}
 
 	//  Seek to the eighth data field -- HDOP
-	nmea = strchr(++nmea, ',');
+	nmea = strchr(&nmea[1], ',');
 	if (nmea == NULL) {
 		return nmea_err_baddata;
 	}
@@ -264,7 +267,7 @@ nmea_err_t NMEA_Parser::parse_gga(char* nmea, uint8_t len) {
 	}
 
 	//  Seek to the ninth data field -- altitude from sea level
-	nmea = strchr(++nmea, ',');
+	nmea = strchr(&nmea[1], ',');
 	if (nmea == NULL) {
 		return nmea_err_baddata;
 	}
@@ -272,13 +275,13 @@ nmea_err_t NMEA_Parser::parse_gga(char* nmea, uint8_t len) {
 	if (err != nmea_success) {
 		return err;
 	}
-	nmea = strchr(++nmea, ',');
+	nmea = strchr(&nmea[1], ',');
 	if (nmea == NULL || nmea[1] != 'M') {
 		return nmea_err_baddata;
 	}
 
 	//  Seek to the eleventh data field -- altitude from WGS84 datum
-	nmea = strchr(++nmea, ',');
+	nmea = strchr(&nmea[1], ',');
 	if (nmea == NULL) {
 		return nmea_err_baddata;
 	}
@@ -286,13 +289,13 @@ nmea_err_t NMEA_Parser::parse_gga(char* nmea, uint8_t len) {
 	if (err != nmea_success) {
 		return err;
 	}
-	nmea = strchr(++nmea, ',');
+	nmea = strchr(&nmea[1], ',');
 	if (nmea == NULL || nmea[1] != 'M') {
 		return nmea_err_baddata;
 	}
 
 	//  Seek to the thirteenth data field -- DGPS update age
-	nmea = strchr(++nmea, ',');
+	nmea = strchr(&nmea[1], ',');
 	if (nmea == NULL) {
 		return nmea_err_baddata;
 	}
@@ -302,7 +305,7 @@ nmea_err_t NMEA_Parser::parse_gga(char* nmea, uint8_t len) {
 	}
 
 	//  Seek to the fourteenth data field -- DGPS station ID
-	nmea = strchr(++nmea, ',');
+	nmea = strchr(&nmea[1], ',');
 	if (nmea == NULL) {
 		return nmea_err_baddata;
 	}
@@ -314,11 +317,63 @@ nmea_err_t NMEA_Parser::parse_gga(char* nmea, uint8_t len) {
 	return nmea_success;
 }
 
+nmea_err_t NMEA_Parser::parse_gll(char* nmea, uint8_t len) {
+	register nmea_err_t err;
+
+	//  Seek to the first data field -- latitude
+	nmea = strchr(&nmea[1], ',');
+	if (nmea == NULL) {
+		return nmea_err_baddata;
+	}
+	err = parse_coord(&nmea);
+	if (err != nmea_success) {
+		return err;
+	}
+
+	//  Seek to the third data field -- longitude
+	nmea = strchr(&nmea[1], ',');
+	if (nmea == NULL) {
+		return nmea_err_baddata;
+	}
+	err = parse_coord(&nmea);
+	if (err != nmea_success) {
+		return err;
+	}
+
+	//  According to the specs I could find, the timestamp and active/void
+	//  information is optional.
+
+	//  Seek to the fifth data field -- time
+	//  If it is not present, parsing is COMPLETE. Return success.
+	nmea = strchr(&nmea[1], ',');
+	if (nmea == NULL) {
+		return nmea_success;
+	}
+	err = parse_time(nmea);
+	if (err != nmea_success) {
+		return err;
+	}
+
+	//  Seek to the sixth data field -- active/void
+	nmea = strchr(&nmea[1], ',');
+	if (nmea == NULL) {
+		return nmea_success;
+	}
+	if (nmea[1] == 'A') {
+		_fix = true;
+	}
+	else if (nmea[1] == 'V') {
+		_fix = false;
+	}
+
+	return nmea_success;
+}
+
 nmea_err_t NMEA_Parser::parse_rmc(char* nmea, uint8_t len) {
 	register nmea_err_t err;
 
 	//  Seek to the first data field -- time
-	nmea = strchr(++nmea, ',');
+	nmea = strchr(&nmea[1], ',');
 	if (nmea == NULL) {
 		return nmea_err_baddata;
 	}
@@ -328,7 +383,7 @@ nmea_err_t NMEA_Parser::parse_rmc(char* nmea, uint8_t len) {
 	}
 
 	//  Seek to the second data field -- state
-	nmea = strchr(++nmea, ',');
+	nmea = strchr(&nmea[1], ',');
 	if (nmea == NULL) {
 		return nmea_err_baddata;
 	}
@@ -339,7 +394,7 @@ nmea_err_t NMEA_Parser::parse_rmc(char* nmea, uint8_t len) {
 		_fix = false;
 		//  Fast-forward to date
 		for (uint8_t idx = 0; idx < 7; ++idx) {
-			nmea = strchr(++nmea, ',');
+			nmea = strchr(&nmea[1], ',');
 		}
 		err = parse_date(nmea);
 		if (err != nmea_success) {
@@ -353,7 +408,7 @@ nmea_err_t NMEA_Parser::parse_rmc(char* nmea, uint8_t len) {
 	}
 
 	//  Seek to the third data field -- latitude
-	nmea = strchr(++nmea, ',');
+	nmea = strchr(&nmea[1], ',');
 	if (nmea == NULL) {
 		return nmea_err_baddata;
 	}
@@ -364,7 +419,7 @@ nmea_err_t NMEA_Parser::parse_rmc(char* nmea, uint8_t len) {
 	//  What in the hell?
 	Serial.print("-----\b\b\b\b\b");
 	//  Seek to the fifth data field -- longitude
-	nmea = strchr(++nmea, ',');
+	nmea = strchr(&nmea[1], ',');
 	if (nmea == NULL) {
 		return nmea_err_baddata;
 	}
@@ -374,7 +429,7 @@ nmea_err_t NMEA_Parser::parse_rmc(char* nmea, uint8_t len) {
 	}
 
 	//  Seek to the seventh data field -- speed
-	nmea = strchr(++nmea, ',');
+	nmea = strchr(&nmea[1], ',');
 	if (nmea == NULL) {
 		return nmea_err_baddata;
 	}
@@ -384,7 +439,7 @@ nmea_err_t NMEA_Parser::parse_rmc(char* nmea, uint8_t len) {
 	}
 
 	//  Seek to the eighth data field -- heading
-	nmea = strchr(++nmea, ',');
+	nmea = strchr(&nmea[1], ',');
 	if (nmea == NULL) {
 		return nmea_err_baddata;
 	}
@@ -398,7 +453,7 @@ nmea_err_t NMEA_Parser::parse_rmc(char* nmea, uint8_t len) {
 	}
 
 	//  Seek to the ninth field -- date
-	nmea = strchr(++nmea, ',');
+	nmea = strchr(&nmea[1], ',');
 	if (nmea == NULL) {
 		return nmea_err_baddata;
 	}
@@ -408,13 +463,13 @@ nmea_err_t NMEA_Parser::parse_rmc(char* nmea, uint8_t len) {
 	}
 
 	//  Seek to the tenth field -- magnetic variation
-	nmea = strchr(++nmea, ',');
+	nmea = strchr(&nmea[1], ',');
 	if (nmea == NULL) {
 		return nmea_success;
 	}
 	err = parse_double(nmea, &_magvar);
 	if (err == nmea_success) {
-		nmea = strchr(++nmea, ',');
+		nmea = strchr(&nmea[1], ',');
 		if (nmea == NULL) {
 			return nmea_success;
 		}

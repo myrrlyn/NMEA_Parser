@@ -279,6 +279,16 @@ virtual nmea_err_t NMEA_Parser::parse_gga(char* nmea, uint8_t len);
 
 Parses a GGA-type NMEA sentence and stores the payload in the instance fields.
 
+##### GLL Parser
+
+```cpp
+virtual nmea_err_t NMEA_Parser::parse_gll(char* nmea, uint8_t len);
+```
+
+Parses a GLL-type NMEA sentence and stores the payload in the instance fields.
+
+GLL only provides latitude, longitude, time, and active/void.
+
 ##### RMC Parser
 
 ```cpp

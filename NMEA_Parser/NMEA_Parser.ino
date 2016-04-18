@@ -1,6 +1,5 @@
 #include "NMEA_Parser.hpp"
 
-NMEA_Parser demo;
 nmea_err_t err;
 bool result = true;
 
@@ -15,6 +14,9 @@ void setup() {
 
 	Serial.println("Testing master parser...");
 	Serial.println();
+
+	{
+	NMEA_Parser demo;
 
 	//  Expect NULL pointer detection and abort
 	err = demo.parse(NULL);
@@ -33,6 +35,7 @@ void setup() {
 
 	err = demo.parse("$GPRMC,*00");
 	result &= test(err, nmea_err_badcsum);
+	}
 
 	{
 	NMEA_Parser demo;
@@ -65,14 +68,23 @@ void setup() {
 	demo.print_info();
 	}
 
+	{
+	NMEA_Parser demo;
+
+	err = demo.parse("$GPGLL,4137.8873,N,08500.4143,W,203827.123,A,D*48");
+	result &= test(err, nmea_success);
+
+	demo.print_info();
+	}
+
 	Serial.println();
 	Serial.println("--------------------");
 	Serial.println(result ? "TESTS SUCCEEDED" : "TESTS FAILED");
 	Serial.println("--------------------");
 	Serial.println();
 
-	err = demo.parse("$GPGLL,4137.8873,N,08500.4143,W,203827.123,A,D*48");
-	result &= test(err, nmea_success);
+	{
+	NMEA_Parser demo;
 
 	//  Optional, satellites in active use
 	err = demo.parse("$GPGSA,A,3,11,27,23,28,08,,,,,,,,1.66,1.37,0.94*0D");
@@ -81,6 +93,7 @@ void setup() {
 	//  Optional, satellites in view
 	err = demo.parse("$GPGSV,3,1,10,08,72,126,17,07,59,314,,27,51,059,20,09,47,223,*7F");
 	result &= test(err, nmea_err_unknown);
+	}
 }
 
 void loop() {
