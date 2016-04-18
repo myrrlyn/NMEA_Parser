@@ -22,6 +22,12 @@ NMEA_Parser::NMEA_Parser() :
 		.speed = 0.0,
 		.heading = 0.0,
 	}),
+/*
+	_dgps({
+		.id = 0,
+		.age = 0,
+	}),
+*/
 	_hdop(0.0),
 	_magvar(0.0),
 	_satellites_visible(0),
@@ -83,6 +89,7 @@ bool NMEA_Parser::fix() {
 
 #ifdef ARDUINO
 void NMEA_Parser::print_info() {
+	Serial.println();
 	Serial.print("Timestamp: ");
 	Serial.print(_timestamp.year);
 	Serial.print('-');
@@ -121,6 +128,13 @@ void NMEA_Parser::print_info() {
 	Serial.println(" degrees true");
 	Serial.print("Magnetic variation: ");
 	Serial.println(_magvar);
+/*
+	Serial.print("DGPS ID:  ");
+	Serial.println(_dgps.id);
+	Serial.print("DGPS Age: ");
+	Serial.println(_dgps.age);
+*/
+	Serial.println();
 }
 #endif
 
@@ -277,7 +291,27 @@ nmea_err_t NMEA_Parser::parse_gga(char* nmea, uint8_t len) {
 		return nmea_err_baddata;
 	}
 
-	Serial.println(nmea);
+/*
+	//  Seek to the thirteenth data field -- DGPS update age
+	nmea = strchr(++nmea, ',');
+	if (nmea == NULL) {
+		return nmea_err_baddata;
+	}
+	err = parse_int(nmea, &_dgps.age);
+	if (err != nmea_success) {
+		return err;
+	}
+
+	//  Seek to the fourteenth data field -- DGPS station ID
+	nmea = strchr(++nmea, ',');
+	if (nmea == NULL) {
+		return nmea_err_baddata;
+	}
+	err = parse_int(nmea, &_dgps.id);
+	if (err != nmea_success) {
+		return err;
+	}
+*/
 
 	return nmea_success;
 }
@@ -510,6 +544,16 @@ nmea_err_t NMEA_Parser::parse_time(char* nmea) {
 }
 
 nmea_err_t NMEA_Parser::parse_int(char* nmea, uint8_t* store) {
+	uint16_t tmp;
+	nmea_err_t err = parse_int(nmea, &tmp);
+	if (err != nmea_success) {
+		return err;
+	}
+	*store = (uint8_t)tmp;
+	return nmea_success;
+}
+
+nmea_err_t NMEA_Parser::parse_int(char* nmea, uint16_t* store) {
 	*store = 0;
 	if (nmea[1] == ',') {
 		return nmea_err_baddata;

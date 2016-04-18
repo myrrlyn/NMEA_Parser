@@ -52,6 +52,11 @@ A structure with two `double`s, speed and heading.
 GPS modules can calculate apparent speed and heading using the most recently
 acquired coordinates. Speed is printed in knots; heading in degrees-from-true.
 
+##### `nmea_dgps_t`
+
+A structure with two `uint16_t`s that stores the local DGPS station identifier
+and update age.
+
 ##### `nmea_magvar_t`
 
 Alias for `double`. Holds the magnetic variation from true North in the current
@@ -112,6 +117,12 @@ the height difference from WGS84.
 
 ```cpp
 nmea_velocity_t NMEA_Parser::velocity(void);
+```
+
+##### DGPS information
+
+```cpp
+nmea_dgps_t NMEA_Parser::dgps(void);
 ```
 
 ##### Horizontal Dilution of Precision

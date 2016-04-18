@@ -56,7 +56,7 @@ void setup() {
 	}
 
 	{
-	err = demo.parse("$GPGGA,203827.123,4137.8873,N,08500.4143,W,2,05,1.37,308.3,M,-33.8,M,0000,0000*56");
+	err = demo.parse("$GPGGA,203827.123,4137.8873,N,08500.4143,W,2,05,1.37,308.3,M,-33.8,M,1234,5678*56");
 	result &= test(err, nmea_success);
 
 	demo.print_info();
