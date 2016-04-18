@@ -165,6 +165,9 @@ nmea_err_t NMEA_Parser::delegate_parse(char* nmea, uint8_t len) {
 	if (strstr(nmea, "$GPGGA")) {
 		return parse_gga(nmea, len);
 	}
+	if (strstr(nmea, "$GPGLL")) {
+		return parse_gll(nmea, len);
+	}
 	if (strstr(nmea, "$GPRMC")) {
 		return parse_rmc(nmea, len);
 	}
@@ -311,6 +314,10 @@ nmea_err_t NMEA_Parser::parse_gga(char* nmea, uint8_t len) {
 		return err;
 	}
 
+	return nmea_success;
+}
+
+nmea_err_t NMEA_Parser::parse_gll(char* nmea, uint8_t len) {
 	return nmea_success;
 }
 
