@@ -1,5 +1,11 @@
 # Changelog
 
+### v0.3.0
+
+- Add a GLL sentence parser
+- Decouple next-character string traversal from incrementing-pointer memory
+traversal.
+
 ### v0.2.0
 
 - Add a GGA sentence parser
