@@ -379,13 +379,36 @@ the header and a `*` before the two-digit checksum.
 
 Modules may choose to end the sentences in `\r`, `\n` or `\r\n`.
 
+### GGA
+
+General GPS information set.
+
+- `$GPGGA` &ndash; Header and identifier.
+- `/[0-9]{6}/` &ndash; Time in UTC. GPS time is offset from UTC, and the GPS
+signals include this offset for the receiver to calculate UTC time.
+- `/[0-9]{4}\.[0-9]{4}/` - Latitude. Ranges from 0000.0000 to 9000.0000. Encoded
+in DDMM.mmmm format.
+- `/[NS]/` &ndash; Hemisphere. N for North, S for South. North is positive.
+- `/[0-9]{5}\.[0-9]{4}/` &ndash; Longitude. Ranges from 00000.0000 to
+18000.0000. Encoded in DDDMM.mmmm format.
+- `/[EW]/` &ndash; Hemisphere. E for East, W for West. East is positive.
+- `/[012]/` &ndash; GPS fix quality. 0 is none, 1 is satellite-only, 2 is ground
+assisted.
+- `/[0-9]+/` &ndash; Satellite count.
+- `/[0-9]+\.[0-9]+/` &ndash; HDOP.
+- `/-?[0-9]+\.[0-9]+/` &ndash; Altitude in meters from sea level.
+- `/M/` &ndash; Signifies that altitude is in meters.
+`/-?[0-9]+\.[0-9]+/` &ndash; Altitude in meters from WGS84 reference ellipsoid.
+- `/M/` &ndash; Signifies that altitude is in meters.
+- `/[0-9]{4}/` &ndash; DGPS Time since last update.
+- `/[0-9]{4}/` &ndash; DGPS Station identifier.
+
 ### RMC
 
 Recommended Minimum Coordinates.
 
 - `$GPRMC` &ndash; Header and identifier.
-- `/[0-9]{6}/` &ndash; Time in UTC. GPS time is offset from UTC, and the GPS
-signals include this offset for the receiver to calculate UTC time.
+- `/[0-9]{6}/` &ndash; Time in UTC.
 - `/[AV]/` &ndash; Fix status. A for Active, V for Void.
 - `/[0-9]{4}\.[0-9]{4}/` - Latitude. Ranges from 0000.0000 to 9000.0000. Encoded
 in DDMM.mmmm format.
