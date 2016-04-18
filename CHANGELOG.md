@@ -1,5 +1,9 @@
 # Changelog
 
+### v0.2.0
+
+- Add a GGA sentence parser
+
 ### v0.1.1
 
 - Use the proper architecture type for the Due (AtmelSAM, not AtmelAVR)
