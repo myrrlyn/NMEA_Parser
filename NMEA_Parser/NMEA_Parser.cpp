@@ -258,8 +258,12 @@ nmea_err_t NMEA_Parser::parse_gga(char* nmea, uint8_t len) {
 	if (err != nmea_success) {
 		return err;
 	}
+	nmea = strchr(++nmea, ',');
+	if (nmea == NULL || nmea[1] != 'M') {
+		return nmea_err_baddata;
+	}
 
-	//  Seek to the tenth data field -- altitude from WGS84 datum
+	//  Seek to the eleventh data field -- altitude from WGS84 datum
 	nmea = strchr(++nmea, ',');
 	if (nmea == NULL) {
 		return nmea_err_baddata;
@@ -267,6 +271,10 @@ nmea_err_t NMEA_Parser::parse_gga(char* nmea, uint8_t len) {
 	err = parse_double(nmea, &_alt_wgs);
 	if (err != nmea_success) {
 		return err;
+	}
+	nmea = strchr(++nmea, ',');
+	if (nmea == NULL || nmea[1] != 'M') {
+		return nmea_err_baddata;
 	}
 
 	Serial.println(nmea);
@@ -321,6 +329,8 @@ nmea_err_t NMEA_Parser::parse_rmc(char* nmea, uint8_t len) {
 	if (err != nmea_success) {
 		return err;
 	}
+	//  What in the hell?
+	Serial.print("-----\b\b\b\b\b");
 	//  Seek to the fifth data field -- longitude
 	nmea = strchr(++nmea, ',');
 	if (nmea == NULL) {
