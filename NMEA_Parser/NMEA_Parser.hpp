@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#define __MYRRLYN_NMEA_PARSER_VERSION "0.1.1"
+#define __MYRRLYN_NMEA_PARSER_VERSION "0.2.0"
 
 typedef enum : uint8_t {
 	nmea_success     = 0x00,
