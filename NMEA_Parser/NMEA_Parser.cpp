@@ -318,6 +318,54 @@ nmea_err_t NMEA_Parser::parse_gga(char* nmea, uint8_t len) {
 }
 
 nmea_err_t NMEA_Parser::parse_gll(char* nmea, uint8_t len) {
+	register nmea_err_t err;
+
+	//  Seek to the first data field -- latitude
+	nmea = strchr(++nmea, ',');
+	if (nmea == NULL) {
+		return nmea_err_baddata;
+	}
+	err = parse_coord(&nmea);
+	if (err != nmea_success) {
+		return err;
+	}
+
+	//  Seek to the third data field -- longitude
+	nmea = strchr(++nmea, ',');
+	if (nmea == NULL) {
+		return nmea_err_baddata;
+	}
+	err = parse_coord(&nmea);
+	if (err != nmea_success) {
+		return err;
+	}
+
+	//  According to the specs I could find, the timestamp and active/void
+	//  information is optional.
+
+	//  Seek to the fifth data field -- time
+	//  If it is not present, parsing is COMPLETE. Return success.
+	nmea = strchr(++nmea, ',');
+	if (nmea == NULL) {
+		return nmea_success;
+	}
+	err = parse_time(nmea);
+	if (err != nmea_success) {
+		return err;
+	}
+
+	//  Seek to the sixth data field -- active/void
+	nmea = strchr(++nmea, ',');
+	if (nmea == NULL) {
+		return nmea_success;
+	}
+	if (nmea[1] == 'A') {
+		_fix = true;
+	}
+	else if (nmea[1] == 'V') {
+		_fix = false;
+	}
+
 	return nmea_success;
 }
 
