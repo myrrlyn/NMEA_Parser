@@ -34,6 +34,9 @@ void setup() {
 	err = demo.parse("$GPRMC,*00");
 	result &= test(err, nmea_err_badcsum);
 
+	{
+	NMEA_Parser demo;
+
 	//  Expect missing data and abort
 	err = demo.parse("$GPRMC,203826.123,V,,,,,,,160416,,,D*4E");
 	result &= test(err, nmea_err_nofix);
@@ -51,15 +54,22 @@ void setup() {
 	result &= test(err, nmea_success);
 
 	demo.print_info();
+	}
+
+	{
+	NMEA_Parser demo;
+
+	err = demo.parse("$GPGGA,203827.123,4137.8873,N,08500.4143,W,2,05,1.37,308.3,M,-33.8,M,1234,5678*5E");
+	result &= test(err, nmea_success);
+
+	demo.print_info();
+	}
 
 	Serial.println();
 	Serial.println("--------------------");
 	Serial.println(result ? "TESTS SUCCEEDED" : "TESTS FAILED");
 	Serial.println("--------------------");
 	Serial.println();
-
-	err = demo.parse("$GPGGA,203827.123,4137.8873,N,08500.4143,W,2,05,1.37,308.3,M,-33.8,M,0000,0000*56");
-	result &= test(err, nmea_success);
 
 	err = demo.parse("$GPGLL,4137.8873,N,08500.4143,W,203827.123,A,D*48");
 	result &= test(err, nmea_success);

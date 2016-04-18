@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#define __MYRRLYN_NMEA_PARSER_VERSION "0.1.1"
+#define __MYRRLYN_NMEA_PARSER_VERSION "0.2.0"
 
 typedef enum : uint8_t {
 	nmea_success     = 0x00,
@@ -16,11 +16,6 @@ typedef enum : uint8_t {
 } nmea_err_t;
 
 typedef struct {
-	int32_t latitude;
-	int32_t longitude;
-} nmea_coord_t;
-
-typedef struct {
 	uint8_t year;
 	uint8_t month;
 	uint8_t day;
@@ -30,22 +25,43 @@ typedef struct {
 	uint16_t millisecond;
 } nmea_timestamp_t;
 
-typedef double nmea_magvar_t;
+typedef struct {
+	int32_t latitude;
+	int32_t longitude;
+} nmea_coord_t;
 
 typedef struct {
 	double speed;
 	double heading;
 } nmea_velocity_t;
 
+typedef struct {
+	uint16_t id;
+	uint16_t age;
+} nmea_dgps_t;
+
+typedef double nmea_magvar_t;
+
+typedef enum : uint8_t {
+	nmea_fix_invalid = 0,
+	nmea_fix_normal  = 1,
+	nmea_fix_dgps    = 2,
+} nmea_fix_quality_t;
+
 class NMEA_Parser {
 public:
 	NMEA_Parser(void);
 	nmea_err_t parse(char* nmea, uint8_t len = 0);
 
-	nmea_coord_t coordinates(void);
 	nmea_timestamp_t timestamp(void);
+	nmea_coord_t coordinates(void);
+	double altitude(char ref = 's');
 	nmea_velocity_t velocity(void);
+	nmea_dgps_t dgps(void);
+	double hdop(void);
 	nmea_magvar_t magnetic_variation(void);
+	uint8_t satellites(void);
+	nmea_fix_quality_t fix_quality(void);
 	bool fix(void);
 
 #ifdef ARDUINO
@@ -58,17 +74,26 @@ protected:
 	virtual nmea_err_t delegate_parse(char* nmea, uint8_t len = 0);
 	virtual nmea_err_t validate_checksum(char* nmea, uint8_t len);
 
+	virtual nmea_err_t parse_gga(char* nmea, uint8_t len);
 	virtual nmea_err_t parse_rmc(char* nmea, uint8_t len);
 
 	virtual nmea_err_t parse_coord(char** nmea);
 	virtual nmea_err_t parse_date(char* nmea);
 	virtual nmea_err_t parse_time(char* nmea);
+	virtual nmea_err_t parse_int(char* nmea, uint8_t* store);
+	virtual nmea_err_t parse_int(char* nmea, uint16_t* store);
 	virtual nmea_err_t parse_double(char* nmea, double* store);
 
-	nmea_coord_t _coordinates;
 	nmea_timestamp_t _timestamp;
+	nmea_coord_t _coordinates;
+	double _alt_sea;
+	double _alt_wgs;
 	nmea_velocity_t _velocity;
+	nmea_dgps_t _dgps;
+	double _hdop;
 	nmea_magvar_t _magvar;
+	uint8_t _satellites_visible;
+	nmea_fix_quality_t _fix_quality;
 	bool _fix;
 };
 
