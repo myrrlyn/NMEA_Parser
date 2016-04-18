@@ -35,12 +35,10 @@ typedef struct {
 	double heading;
 } nmea_velocity_t;
 
-/*
 typedef struct {
 	uint16_t id;
 	uint16_t age;
 } nmea_dgps_t;
-*/
 
 typedef double nmea_magvar_t;
 
@@ -59,9 +57,7 @@ public:
 	nmea_coord_t coordinates(void);
 	double altitude(char ref = 's');
 	nmea_velocity_t velocity(void);
-/*
-	nmea_dgps_t dpgs(void);
-*/
+	nmea_dgps_t dgps(void);
 	double hdop(void);
 	nmea_magvar_t magnetic_variation(void);
 	uint8_t satellites(void);
@@ -93,9 +89,7 @@ protected:
 	double _alt_sea;
 	double _alt_wgs;
 	nmea_velocity_t _velocity;
-/*
 	nmea_dgps_t _dgps;
-*/
 	double _hdop;
 	nmea_magvar_t _magvar;
 	uint8_t _satellites_visible;
