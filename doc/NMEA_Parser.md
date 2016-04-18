@@ -52,6 +52,11 @@ A structure with two `double`s, speed and heading.
 GPS modules can calculate apparent speed and heading using the most recently
 acquired coordinates. Speed is printed in knots; heading in degrees-from-true.
 
+##### `nmea_dgps_t`
+
+A structure with two `uint16_t`s that stores the local DGPS station identifier
+and update age.
+
 ##### `nmea_magvar_t`
 
 Alias for `double`. Holds the magnetic variation from true North in the current
@@ -86,17 +91,27 @@ and where the failure occurred.
 
 These methods return copies of the indicated data field.
 
+##### Timestamp
+
+```cpp
+nmea_timestamp_t NMEA_Parser::timestamp(void);
+```
+
 ##### Coordinates
 
 ```cpp
 nmea_coord_t NMEA_Parser::coordinates(void);
 ```
 
-##### Timestamp
+##### Altitudes
 
 ```cpp
-nmea_timestamp_t NMEA_Parser::timestamp(void);
+nmea_coord_t NMEA_Parser::altitude(char ref = 's');
 ```
+
+There are two reference levels for altitude: sea level and the WGS84 canonical
+spheroid. Call with `'s'` for the sea level altitude (default) or with `'w'` for
+the height difference from WGS84.
 
 ##### Velocity
 
@@ -104,15 +119,49 @@ nmea_timestamp_t NMEA_Parser::timestamp(void);
 nmea_velocity_t NMEA_Parser::velocity(void);
 ```
 
+##### DGPS information
+
+```cpp
+nmea_dgps_t NMEA_Parser::dgps(void);
+```
+
+##### Horizontal Dilution of Precision
+
+```cpp
+double NMEA_Parser::hdop(void);
+```
+
+The smaller, the better.
+
+- < 1.0 &ndash; IDEAL. The information received at this precision can be used
+for nigh-surgical levels of geographical positioning.
+- 1.0 <--> 2.0 &ndash; Excellent. Position measurements in this range are good
+enough for ~95% of uses.
+- 2.0 <--> 5.0 &ndash; Pretty good. This is the limit for most cartographic
+applications. Position measurements here are sufficient for navigation.
+- 5.0 <--> 10.0 &ndash; Acceptable. Measurements can be used for static
+positioning but should not be used for moving references. Try to improve
+environmental conditions, such as sky view.
+- 10.0 <--> 20.0 &ndash; Mediocre. Position measurements are very general.
+- > 20.0 &ndash; Imprecision is up to several hundred meters. Measurements
+should be discarded entirely.
+
 ##### Magnetic Variation
 
 ```cpp
 nmea_magvar_t NMEA_Parser::magnetic_variation(void);
 ```
 
-##### Fix Status
+##### Satellite Counts
 
 ```cpp
+uint8_t NMEA_Parser::satellites(void);
+```
+
+##### Fix Information
+
+```cpp
+nmea_fix_quality_t NMEA_Parser::fix_quality(void);
 bool NMEA_Parser::fix(void);
 ```
 
@@ -219,6 +268,17 @@ sentences with no checksum to be permitted.
 
 The sentence-type parsers will fail if any of their internal sections fail.
 
+Sentence parsers will only update the instance variables for fields that they
+actually contain. A parser will not destroy information that it cannot replace.
+
+##### GGA Parser
+
+```cpp
+virtual nmea_err_t NMEA_Parser::parse_gga(char* nmea, uint8_t len);
+```
+
+Parses a GGA-type NMEA sentence and stores the payload in the instance fields.
+
 ##### RMC Parser
 
 ```cpp
@@ -277,7 +337,8 @@ Reads the timestamp out of an NMEA fragment and stores the data.
 ##### Numeric Parser
 
 ```cpp
-virtual nmea_err_t NMEA_Parser::parse_double(char* nmea);
+virtual nmea_err_t NMEA_Parser::parse_int(char* nmea, uint8_t* store);
+virtual nmea_err_t NMEA_Parser::parse_double(char* nmea, double* store);
 ```
 
 ### Public Static Methods
@@ -318,13 +379,36 @@ the header and a `*` before the two-digit checksum.
 
 Modules may choose to end the sentences in `\r`, `\n` or `\r\n`.
 
+### GGA
+
+General GPS information set.
+
+- `$GPGGA` &ndash; Header and identifier.
+- `/[0-9]{6}/` &ndash; Time in UTC. GPS time is offset from UTC, and the GPS
+signals include this offset for the receiver to calculate UTC time.
+- `/[0-9]{4}\.[0-9]{4}/` - Latitude. Ranges from 0000.0000 to 9000.0000. Encoded
+in DDMM.mmmm format.
+- `/[NS]/` &ndash; Hemisphere. N for North, S for South. North is positive.
+- `/[0-9]{5}\.[0-9]{4}/` &ndash; Longitude. Ranges from 00000.0000 to
+18000.0000. Encoded in DDDMM.mmmm format.
+- `/[EW]/` &ndash; Hemisphere. E for East, W for West. East is positive.
+- `/[012]/` &ndash; GPS fix quality. 0 is none, 1 is satellite-only, 2 is ground
+assisted.
+- `/[0-9]+/` &ndash; Satellite count.
+- `/[0-9]+\.[0-9]+/` &ndash; HDOP.
+- `/-?[0-9]+\.[0-9]+/` &ndash; Altitude in meters from sea level.
+- `/M/` &ndash; Signifies that altitude is in meters.
+`/-?[0-9]+\.[0-9]+/` &ndash; Altitude in meters from WGS84 reference ellipsoid.
+- `/M/` &ndash; Signifies that altitude is in meters.
+- `/[0-9]{4}/` &ndash; DGPS Time since last update.
+- `/[0-9]{4}/` &ndash; DGPS Station identifier.
+
 ### RMC
 
 Recommended Minimum Coordinates.
 
 - `$GPRMC` &ndash; Header and identifier.
-- `/[0-9]{6}/` &ndash; Time in UTC. GPS time is offset from UTC, and the GPS
-signals include this offset for the receiver to calculate UTC time.
+- `/[0-9]{6}/` &ndash; Time in UTC.
 - `/[AV]/` &ndash; Fix status. A for Active, V for Void.
 - `/[0-9]{4}\.[0-9]{4}/` - Latitude. Ranges from 0000.0000 to 9000.0000. Encoded
 in DDMM.mmmm format.
