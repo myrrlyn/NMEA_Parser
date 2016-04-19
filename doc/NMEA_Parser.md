@@ -15,6 +15,10 @@ is available through accessor functions.
 This is the type returned by the master `parse()` function and all parsing
 functions it calls. It indicates the status of a parsing call.
 
+```cpp
+typedef enum : uint8_t { } nmea_err_t;
+```
+
 1. `nmea_success` &ndash; Returned when the parse completes successfully. This
 value does not guarantee that *all* stored data is correct, as NMEA sentences
 each carry a subset of the possible data.
@@ -29,10 +33,32 @@ present, but does not match actual contents.
 7. `nmea_err_nofix` &ndash; Returned when a sentence is correct, but the GPS
 module does not have a satellite fix and thus has not provided all the fields.
 
+##### `nmea_coord_u`
+
+A union of `float` and `int32_t`. Both fields should be 32 bits wide on the
+platforms this library targets.
+
+```cpp
+typedef union { float f; int32_t i; } nmea_coord_u;
+```
+
+```cpp
+nmea_coord_u example;
+example.f = 100.0;  //  float
+example.i = 50;     //  int32_t
+```
+
+This construct will compile in my original project but not in this library. I
+don't know why. It is disabled for the time being.
+
 ##### `nmea_coord_t`
 
-A struct of two `nmea_coord_u` unions; one for latitude and one for longitude.
+A struct of two `int32_t` variables; one for latitude and one for longitude.
 Altitude is stored in a separate variable.
+
+```cpp
+typedef struct { int32_t latitude; int32_t longitude } nmea_coord_t;
+```
 
 NMEA coordinates are given in the form DDMM.mmmm, with the fractional part being
 of minutes, NOT seconds.
@@ -45,21 +71,41 @@ Two digit year, month, day, hour, minute, and second values; three-digit
 millisecond value. Date values start from 1, time values start from 0. GPS time
 does **NOT** recognize leap seconds, so there is no second 60.
 
+```cpp
+typedef struct {
+    uint8_t year;
+    uint8_t month;
+    uint8_t day;
+    uint8_t hour;
+    uint8_t minute;
+    uint8_t second;
+    uint16_t millisecond;
+} nmea_timestamp_t;
+```
+
 ##### `nmea_velocity_t`
 
-A structure with two `double`s, speed and heading.
+A structure with two `float`s, speed and heading.
 
 GPS modules can calculate apparent speed and heading using the most recently
 acquired coordinates. Speed is printed in knots; heading in degrees-from-true.
+
+```cpp
+typedef struct { float speed; float heading; } nmea_velocity_t;
+```
 
 ##### `nmea_dgps_t`
 
 A structure with two `uint16_t`s that stores the local DGPS station identifier
 and update age.
 
+```cpp
+typedef struct { uint16_t id; uint16_t age; } nmea_dgps_t;
+```
+
 ##### `nmea_magvar_t`
 
-Alias for `double`. Holds the magnetic variation from true North in the current
+Alias for `float`. Holds the magnetic variation from true North in the current
 location.
 
 This is an optional field. Its absence from a sentence will not cause a parse
@@ -128,7 +174,7 @@ nmea_dgps_t NMEA_Parser::dgps(void);
 ##### Horizontal Dilution of Precision
 
 ```cpp
-double NMEA_Parser::hdop(void);
+float NMEA_Parser::hdop(void);
 ```
 
 The smaller, the better.
@@ -344,11 +390,12 @@ virtual nmea_err_t NMEA_Parser::parse_time(char* nmea);
 
 Reads the timestamp out of an NMEA fragment and stores the data.
 
-##### Numeric Parser
+##### Numeric Parsers
 
 ```cpp
 virtual nmea_err_t NMEA_Parser::parse_int(char* nmea, uint8_t* store);
-virtual nmea_err_t NMEA_Parser::parse_double(char* nmea, double* store);
+virtual nmea_err_t NMEA_Parser::parse_int(char* nmea, uint16_t* store);
+virtual nmea_err_t NMEA_Parser::parse_float(char* nmea, float* store);
 ```
 
 ### Public Static Methods
@@ -412,6 +459,20 @@ assisted.
 - `/M/` &ndash; Signifies that altitude is in meters.
 - `/[0-9]{4}/` &ndash; DGPS Time since last update.
 - `/[0-9]{4}/` &ndash; DGPS Station identifier.
+
+### GLL
+
+Geographic Latitude and Longitude.
+
+- `$GPGLL` &ndash; Header and identifier.
+- `/[0-9]{4}\.[0-9]{4}/` - Latitude. Ranges from 0000.0000 to 9000.0000. Encoded
+in DDMM.mmmm format.
+- `/[NS]/` &ndash; Hemisphere. N for North, S for South. North is positive.
+- `/[0-9]{5}\.[0-9]{4}/` &ndash; Longitude. Ranges from 00000.0000 to
+18000.0000. Encoded in DDDMM.mmmm format.
+- `/[EW]/` &ndash; Hemisphere. E for East, W for West. East is positive.
+- `/[0-9]{6}/` &ndash; Time in UTC.
+- `/[AV]/` &ndash; Fix status. A for Active, V for Void.
 
 ### RMC
 

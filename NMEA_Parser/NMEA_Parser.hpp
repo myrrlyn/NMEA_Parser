@@ -25,14 +25,21 @@ typedef struct {
 	uint16_t millisecond;
 } nmea_timestamp_t;
 
+/*
+typedef struct {
+	float f;
+	int32_t i;
+} nmea_coord_u;
+*/
+
 typedef struct {
 	int32_t latitude;
 	int32_t longitude;
 } nmea_coord_t;
 
 typedef struct {
-	double speed;
-	double heading;
+	float speed;
+	float heading;
 } nmea_velocity_t;
 
 typedef struct {
@@ -40,7 +47,7 @@ typedef struct {
 	uint16_t age;
 } nmea_dgps_t;
 
-typedef double nmea_magvar_t;
+typedef float nmea_magvar_t;
 
 typedef enum : uint8_t {
 	nmea_fix_invalid = 0,
@@ -55,10 +62,10 @@ public:
 
 	nmea_timestamp_t timestamp(void);
 	nmea_coord_t coordinates(void);
-	double altitude(char ref = 's');
+	float altitude(char ref = 's');
 	nmea_velocity_t velocity(void);
 	nmea_dgps_t dgps(void);
-	double hdop(void);
+	float hdop(void);
 	nmea_magvar_t magnetic_variation(void);
 	uint8_t satellites(void);
 	nmea_fix_quality_t fix_quality(void);
@@ -83,15 +90,15 @@ protected:
 	virtual nmea_err_t parse_time(char* nmea);
 	virtual nmea_err_t parse_int(char* nmea, uint8_t* store);
 	virtual nmea_err_t parse_int(char* nmea, uint16_t* store);
-	virtual nmea_err_t parse_double(char* nmea, double* store);
+	virtual nmea_err_t parse_float(char* nmea, float* store);
 
 	nmea_timestamp_t _timestamp;
 	nmea_coord_t _coordinates;
-	double _alt_sea;
-	double _alt_wgs;
+	float _alt_sea;
+	float _alt_wgs;
 	nmea_velocity_t _velocity;
 	nmea_dgps_t _dgps;
-	double _hdop;
+	float _hdop;
 	nmea_magvar_t _magvar;
 	uint8_t _satellites_visible;
 	nmea_fix_quality_t _fix_quality;

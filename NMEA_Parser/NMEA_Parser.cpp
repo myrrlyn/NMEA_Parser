@@ -69,7 +69,7 @@ nmea_dgps_t NMEA_Parser::dgps() {
 	return _dgps;
 }
 
-double NMEA_Parser::hdop() {
+float NMEA_Parser::hdop() {
 	return _hdop;
 }
 
@@ -114,9 +114,9 @@ void NMEA_Parser::print_info() {
 	Serial.print("Fix Quality: ");
 	Serial.println((uint8_t)_fix_quality);
 	Serial.print("Location: ");
-	Serial.print((double)_coordinates.latitude / 100.0);
+	Serial.print((float)_coordinates.latitude / 100.0);
 	Serial.print(", ");
-	Serial.println((double)_coordinates.longitude / 100.0);
+	Serial.println((float)_coordinates.longitude / 100.0);
 	Serial.print("Altitude (sea level): ");
 	Serial.println(_alt_sea);
 	Serial.print("Altitude (WGS84):     ");
@@ -261,7 +261,7 @@ nmea_err_t NMEA_Parser::parse_gga(char* nmea, uint8_t len) {
 	if (nmea == NULL) {
 		return nmea_err_baddata;
 	}
-	err = parse_double(nmea, &_hdop);
+	err = parse_float(nmea, &_hdop);
 	if (err != nmea_success) {
 		return err;
 	}
@@ -271,7 +271,7 @@ nmea_err_t NMEA_Parser::parse_gga(char* nmea, uint8_t len) {
 	if (nmea == NULL) {
 		return nmea_err_baddata;
 	}
-	err = parse_double(nmea, &_alt_sea);
+	err = parse_float(nmea, &_alt_sea);
 	if (err != nmea_success) {
 		return err;
 	}
@@ -285,7 +285,7 @@ nmea_err_t NMEA_Parser::parse_gga(char* nmea, uint8_t len) {
 	if (nmea == NULL) {
 		return nmea_err_baddata;
 	}
-	err = parse_double(nmea, &_alt_wgs);
+	err = parse_float(nmea, &_alt_wgs);
 	if (err != nmea_success) {
 		return err;
 	}
@@ -433,7 +433,7 @@ nmea_err_t NMEA_Parser::parse_rmc(char* nmea, uint8_t len) {
 	if (nmea == NULL) {
 		return nmea_err_baddata;
 	}
-	err = parse_double(nmea, &_velocity.speed);
+	err = parse_float(nmea, &_velocity.speed);
 	if (err != nmea_success) {
 		return err;
 	}
@@ -443,7 +443,7 @@ nmea_err_t NMEA_Parser::parse_rmc(char* nmea, uint8_t len) {
 	if (nmea == NULL) {
 		return nmea_err_baddata;
 	}
-	err = parse_double(nmea, &_velocity.heading);
+	err = parse_float(nmea, &_velocity.heading);
 	if (err != nmea_success) {
 		return err;
 	}
@@ -467,7 +467,7 @@ nmea_err_t NMEA_Parser::parse_rmc(char* nmea, uint8_t len) {
 	if (nmea == NULL) {
 		return nmea_success;
 	}
-	err = parse_double(nmea, &_magvar);
+	err = parse_float(nmea, &_magvar);
 	if (err == nmea_success) {
 		nmea = strchr(&nmea[1], ',');
 		if (nmea == NULL) {
@@ -616,7 +616,7 @@ nmea_err_t NMEA_Parser::parse_int(char* nmea, uint16_t* store) {
 	return nmea_success;
 }
 
-nmea_err_t NMEA_Parser::parse_double(char* nmea, double* store) {
+nmea_err_t NMEA_Parser::parse_float(char* nmea, float* store) {
 	*store = 0.0;
 	register uint8_t fracs = 0;
 	register bool in_fracs = false;
@@ -636,7 +636,7 @@ nmea_err_t NMEA_Parser::parse_double(char* nmea, double* store) {
 				continue;
 		}
 		*store *= 10.0;
-		*store += (double)(nmea[idx] - '0');
+		*store += (float)(nmea[idx] - '0');
 		if (in_fracs) {
 			++fracs;
 		}
