@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#define __MYRRLYN_NMEA_PARSER_VERSION "0.3.0"
+#define __MYRRLYN_NMEA_PARSER_VERSION "0.4.0"
 
 typedef enum : uint8_t {
 	nmea_success     = 0x00,
@@ -25,14 +25,21 @@ typedef struct {
 	uint16_t millisecond;
 } nmea_timestamp_t;
 
+/*
+typedef struct {
+	float f;
+	int32_t i;
+} nmea_coord_u;
+*/
+
 typedef struct {
 	int32_t latitude;
 	int32_t longitude;
 } nmea_coord_t;
 
 typedef struct {
-	double speed;
-	double heading;
+	float speed;
+	float heading;
 } nmea_velocity_t;
 
 typedef struct {
@@ -40,13 +47,27 @@ typedef struct {
 	uint16_t age;
 } nmea_dgps_t;
 
-typedef double nmea_magvar_t;
+typedef float nmea_magvar_t;
 
 typedef enum : uint8_t {
 	nmea_fix_invalid = 0,
 	nmea_fix_normal  = 1,
 	nmea_fix_dgps    = 2,
 } nmea_fix_quality_t;
+
+typedef struct {
+	nmea_timestamp_t __timestamp;
+	nmea_coord_t __coordinates;
+	float __altitude_sealevel;
+	float __altitude_wgs84;
+	nmea_velocity_t __velocity;
+	nmea_dgps_t __dgps;
+	float __hdop;
+	nmea_magvar_t __magnetic_variation;
+	uint8_t __satellites_visible;
+	nmea_fix_quality_t __fix_quality;
+	bool __fix;
+} nmea_storage_t;
 
 class NMEA_Parser {
 public:
@@ -55,14 +76,17 @@ public:
 
 	nmea_timestamp_t timestamp(void);
 	nmea_coord_t coordinates(void);
-	double altitude(char ref = 's');
+	float altitude(char ref = 's');
 	nmea_velocity_t velocity(void);
 	nmea_dgps_t dgps(void);
-	double hdop(void);
+	float hdop(void);
 	nmea_magvar_t magnetic_variation(void);
 	uint8_t satellites(void);
 	nmea_fix_quality_t fix_quality(void);
 	bool fix(void);
+
+	nmea_err_t store(nmea_storage_t* storage);
+	nmea_err_t load(nmea_storage_t* storage);
 
 #ifdef ARDUINO
 	void print_info(void);
@@ -83,15 +107,15 @@ protected:
 	virtual nmea_err_t parse_time(char* nmea);
 	virtual nmea_err_t parse_int(char* nmea, uint8_t* store);
 	virtual nmea_err_t parse_int(char* nmea, uint16_t* store);
-	virtual nmea_err_t parse_double(char* nmea, double* store);
+	virtual nmea_err_t parse_float(char* nmea, float* store);
 
 	nmea_timestamp_t _timestamp;
 	nmea_coord_t _coordinates;
-	double _alt_sea;
-	double _alt_wgs;
+	float _alt_sea;
+	float _alt_wgs;
 	nmea_velocity_t _velocity;
 	nmea_dgps_t _dgps;
-	double _hdop;
+	float _hdop;
 	nmea_magvar_t _magvar;
 	uint8_t _satellites_visible;
 	nmea_fix_quality_t _fix_quality;

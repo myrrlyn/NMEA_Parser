@@ -1,10 +1,16 @@
 # Changelog
 
+### v0.4.0
+
+- Change from `double` to `float` (no effect on AVR or SAM)
+- Add `store()` and `load()` API for bulk data transfer
+- Updated documentation
+
 ### v0.3.0
 
 - Add a GLL sentence parser
 - Decouple next-character string traversal from incrementing-pointer memory
-traversal.
+traversal
 
 ### v0.2.0
 
