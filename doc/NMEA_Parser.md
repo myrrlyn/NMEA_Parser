@@ -111,6 +111,11 @@ location.
 This is an optional field. Its absence from a sentence will not cause a parse
 failure. When absent, its value will be marked 0.
 
+##### `nmea_storage_t`
+
+This structure is an exact copy of the data section of the class. It is used for
+bulk transfer of information in and out of class instances.
+
 ### Public Methods
 
 #### Constructor
@@ -210,6 +215,21 @@ uint8_t NMEA_Parser::satellites(void);
 nmea_fix_quality_t NMEA_Parser::fix_quality(void);
 bool NMEA_Parser::fix(void);
 ```
+
+#### Store and Load
+
+```cpp
+nmea_err_t store(nmea_storage_t* storage);
+nmea_err_t load(nmea_storage_t* storage);
+```
+
+These methods transfer a full set of data in or out of a parser instance. This
+allows parse data to be saved to and loaded from storage, or copied into another
+system's memory for operation (such as transferring over the wire).
+
+The `store` method transfers data out of the instance and into the given
+structure; the `load` method populates the instance with data from the given
+structure.
 
 #### Printer
 

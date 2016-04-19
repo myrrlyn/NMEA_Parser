@@ -53,6 +53,20 @@ The parsed data is accessible via value-returning accessors.
 nmea_coord_t location = parser.coordinates();
 ```
 
+The library also supports bulk copy in and out of instances via `store()` and
+`load()`. This can be used for persistent storage or giving the data to another
+system, such as a communication node.
+
+```cpp
+NMEA_Parser parser;
+nmea_storage_t backup;
+parser.store(&backup);
+//  backup now contains a complete copy of parser's data.
+NMEA_Parser clone;
+clone.load(&backup);
+//  clone is now a duplicate of parser
+```
+
 #### Semantic Types
 
 Custom types are used to package and differentiate information from the NMEA
@@ -60,7 +74,7 @@ sentences. The strong type information permits accessors to be used without
 casting in any function, from this library or external, that knows to accept
 them. All the custom types are documented for public use.
 
-### Re-Entrant Functions
+#### Re-Entrant Functions
 
 All functions have fully self-contained state and are suitable for use in a
 multithreaded environment. This promise only holds when operating on separate
@@ -69,7 +83,7 @@ neither atomic nor guaranteed to always reach every field. This library can be
 used in multiple threads or in interrupts, so long as the user takes care that
 there is not competition to use the same instance.
 
-### Modularity
+#### Modularity
 
 Specific field parsers are in their own functions, so sentence parsers only have
 to walk the string and call the appropriate parsers or do some simple checks on

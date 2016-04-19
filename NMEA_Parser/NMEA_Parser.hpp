@@ -55,6 +55,20 @@ typedef enum : uint8_t {
 	nmea_fix_dgps    = 2,
 } nmea_fix_quality_t;
 
+typedef struct {
+	nmea_timestamp_t __timestamp;
+	nmea_coord_t __coordinates;
+	float __altitude_sealevel;
+	float __altitude_wgs84;
+	nmea_velocity_t __velocity;
+	nmea_dgps_t __dgps;
+	float __hdop;
+	nmea_magvar_t __magnetic_variation;
+	uint8_t __satellites_visible;
+	nmea_fix_quality_t __fix_quality;
+	bool __fix;
+} nmea_storage_t;
+
 class NMEA_Parser {
 public:
 	NMEA_Parser(void);
@@ -70,6 +84,9 @@ public:
 	uint8_t satellites(void);
 	nmea_fix_quality_t fix_quality(void);
 	bool fix(void);
+
+	nmea_err_t store(nmea_storage_t* storage);
+	nmea_err_t load(nmea_storage_t* storage);
 
 #ifdef ARDUINO
 	void print_info(void);

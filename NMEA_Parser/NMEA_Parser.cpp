@@ -89,6 +89,36 @@ bool NMEA_Parser::fix() {
 	return _fix;
 }
 
+nmea_err_t NMEA_Parser::store(nmea_storage_t* storage) {
+	storage->__timestamp          = _timestamp;
+	storage->__coordinates        = _coordinates;
+	storage->__altitude_sealevel  = _alt_sea;
+	storage->__altitude_wgs84     = _alt_wgs;
+	storage->__velocity           = _velocity;
+	storage->__dgps               = _dgps;
+	storage->__hdop               = _hdop;
+	storage->__magnetic_variation = _magvar;
+	storage->__satellites_visible = _satellites_visible;
+	storage->__fix_quality        = _fix_quality;
+	storage->__fix                = _fix;
+	return nmea_success;
+}
+
+nmea_err_t NMEA_Parser::load(nmea_storage_t* storage) {
+	_timestamp          = storage->__timestamp;
+	_coordinates        = storage->__coordinates;
+	_alt_sea            = storage->__altitude_sealevel;
+	_alt_wgs            = storage->__altitude_wgs84;
+	_velocity           = storage->__velocity;
+	_dgps               = storage->__dgps;
+	_hdop               = storage->__hdop;
+	_magvar             = storage->__magnetic_variation;
+	_satellites_visible = storage->__satellites_visible;
+	_fix_quality        = storage->__fix_quality;
+	_fix                = storage->__fix;
+	return nmea_success;
+}
+
 #ifdef ARDUINO
 void NMEA_Parser::print_info() {
 	Serial.println();
