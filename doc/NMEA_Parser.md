@@ -10,6 +10,14 @@ is available through accessor functions.
 
 ### Public Types
 
+This library defines a number of types to give clarity and restrictions to its
+actions and signals.
+
+The base values of all types are documented here so that clients can properly
+read from the library. All new types are simply collections or renames of
+standard primitives, so data extracted from this library can be placed in any
+client code that expects the appropriate primitive type.
+
 ##### `nmea_err_t`
 
 This is the type returned by the master `parse()` function and all parsing
@@ -48,16 +56,13 @@ example.f = 100.0;  //  float
 example.i = 50;     //  int32_t
 ```
 
-This construct will compile in my original project but not in this library. I
-don't know why. It is disabled for the time being.
-
 ##### `nmea_coord_t`
 
-A struct of two `int32_t` variables; one for latitude and one for longitude.
+A struct of two `nmea_coord_u` unions; one for latitude and one for longitude.
 Altitude is stored in a separate variable.
 
 ```cpp
-typedef struct { int32_t latitude; int32_t longitude } nmea_coord_t;
+typedef struct { nmea_coord_u latitude; nmea_coord_u longitude } nmea_coord_t;
 ```
 
 NMEA coordinates are given in the form DDMM.mmmm, with the fractional part being

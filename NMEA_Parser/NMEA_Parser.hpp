@@ -25,16 +25,14 @@ typedef struct {
 	uint16_t millisecond;
 } nmea_timestamp_t;
 
-/*
-typedef struct {
+typedef union {
 	float f;
 	int32_t i;
 } nmea_coord_u;
-*/
 
 typedef struct {
-	int32_t latitude;
-	int32_t longitude;
+	nmea_coord_u latitude;
+	nmea_coord_u longitude;
 } nmea_coord_t;
 
 typedef struct {
