@@ -1,5 +1,12 @@
 # Changelog
 
+### v0.5.0
+
+- Add ability to construct from a saved state
+- Fix the `nmea_coord_u` bug. `nmea_coord_t` structs now use `nmea_coord_u`
+instead of `int32_t`. Member access is `loc.latitude.i` for latitude as integer,
+`loc.longitude.f` for longitude as float, etc.
+
 ### v0.4.0
 
 - Change from `double` to `float` (no effect on AVR or SAM)
