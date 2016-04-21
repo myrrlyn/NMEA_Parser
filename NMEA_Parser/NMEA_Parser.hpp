@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#define __MYRRLYN_NMEA_PARSER_VERSION "0.4.0"
+#define __MYRRLYN_NMEA_PARSER_VERSION "0.5.0"
 
 typedef enum : uint8_t {
 	nmea_success     = 0x00,
@@ -25,16 +25,14 @@ typedef struct {
 	uint16_t millisecond;
 } nmea_timestamp_t;
 
-/*
-typedef struct {
+typedef union {
 	float f;
 	int32_t i;
 } nmea_coord_u;
-*/
 
 typedef struct {
-	int32_t latitude;
-	int32_t longitude;
+	nmea_coord_u latitude;
+	nmea_coord_u longitude;
 } nmea_coord_t;
 
 typedef struct {
@@ -72,6 +70,7 @@ typedef struct {
 class NMEA_Parser {
 public:
 	NMEA_Parser(void);
+	NMEA_Parser(nmea_storage_t* seed);
 	nmea_err_t parse(char* nmea, uint8_t len = 0);
 
 	nmea_timestamp_t timestamp(void);

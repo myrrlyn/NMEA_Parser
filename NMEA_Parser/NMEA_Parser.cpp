@@ -1,9 +1,11 @@
 #include "NMEA_Parser.hpp"
 
+#ifdef ARDUINO
 #include <Arduino.h>
+#endif
 
 NMEA_Parser::NMEA_Parser() :
-	_timestamp({
+	_timestamp{
 		.year = 0,
 		.month = 0,
 		.day = 0,
@@ -11,26 +13,40 @@ NMEA_Parser::NMEA_Parser() :
 		.minute = 0,
 		.second = 0,
 		.millisecond = 0,
-	}),
-	_coordinates({
-		.latitude  = 0,
-		.longitude = 0,
-	}),
-	_alt_sea(0.0),
-	_alt_wgs(0.0),
-	_velocity({
+	},
+	_coordinates{
+		.latitude  = { .i = 0 },
+		.longitude = { .i = 0 },
+	},
+	_alt_sea{0.0},
+	_alt_wgs{0.0},
+	_velocity{
 		.speed = 0.0,
 		.heading = 0.0,
-	}),
-	_dgps({
+	},
+	_dgps{
 		.id = 0,
 		.age = 0,
-	}),
-	_hdop(0.0),
-	_magvar(0.0),
-	_satellites_visible(0),
-	_fix_quality(nmea_fix_invalid),
-	_fix(false) {
+	},
+	_hdop{0.0},
+	_magvar{0.0},
+	_satellites_visible{0},
+	_fix_quality{nmea_fix_invalid},
+	_fix{false} {
+}
+
+NMEA_Parser::NMEA_Parser(nmea_storage_t* seed) :
+	_timestamp(seed->__timestamp),
+	_coordinates(seed->__coordinates),
+	_alt_sea(seed->__altitude_sealevel),
+	_alt_wgs(seed->__altitude_wgs84),
+	_velocity(seed->__velocity),
+	_dgps(seed->__dgps),
+	_hdop(seed->__hdop),
+	_magvar(seed->__magnetic_variation),
+	_satellites_visible(seed->__satellites_visible),
+	_fix_quality(seed->__fix_quality),
+	_fix(seed->__fix) {
 }
 
 nmea_err_t NMEA_Parser::parse(char* nmea, uint8_t len) {
@@ -144,9 +160,9 @@ void NMEA_Parser::print_info() {
 	Serial.print("Fix Quality: ");
 	Serial.println((uint8_t)_fix_quality);
 	Serial.print("Location: ");
-	Serial.print((float)_coordinates.latitude / 100.0);
+	Serial.print((float)_coordinates.latitude.i / 100.0);
 	Serial.print(", ");
-	Serial.println((float)_coordinates.longitude / 100.0);
+	Serial.println((float)_coordinates.longitude.i / 100.0);
 	Serial.print("Altitude (sea level): ");
 	Serial.println(_alt_sea);
 	Serial.print("Altitude (WGS84):     ");
@@ -537,10 +553,10 @@ nmea_err_t NMEA_Parser::parse_coord(char** nmea) {
 	//  Seek to the next data field, the hemisphere indicator.
 	*nmea = strchr(++(*nmea), ',');
 	switch ((*nmea)[1]) {
-		case 'N': _coordinates.latitude = tmp; break;
-		case 'E': _coordinates.longitude = tmp; break;
-		case 'S': _coordinates.latitude = -tmp; break;
-		case 'W': _coordinates.longitude = -tmp; break;
+		case 'N': _coordinates.latitude.i = tmp; break;
+		case 'E': _coordinates.longitude.i = tmp; break;
+		case 'S': _coordinates.latitude.i = -tmp; break;
+		case 'W': _coordinates.longitude.i = -tmp; break;
 		case ',': //  Intentional fallthrough.
 		default: return nmea_err_baddata;
 	}
