@@ -127,9 +127,12 @@ bulk transfer of information in and out of class instances.
 
 ```cpp
 NMEA_Parser::NMEA_Parser(void);
+NMEA_Parser::NMEA_Parser(nmea_storage_t* seed);
 ```
 
-Constructs a new GPS Parser instance and initializes instance data fields to 0.
+Constructs a new GPS Parser instance and initializes instance data fields.
+The new Parser instance will be zeroed (default constructor) or populated with
+the given struct's contents (`nmea_storage_t*` constructor).
 
 #### Parser
 

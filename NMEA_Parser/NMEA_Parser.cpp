@@ -35,6 +35,20 @@ NMEA_Parser::NMEA_Parser() :
 	_fix{false} {
 }
 
+NMEA_Parser::NMEA_Parser(nmea_storage_t* seed) :
+	_timestamp(seed->__timestamp),
+	_coordinates(seed->__coordinates),
+	_alt_sea(seed->__altitude_sealevel),
+	_alt_wgs(seed->__altitude_wgs84),
+	_velocity(seed->__velocity),
+	_dgps(seed->__dgps),
+	_hdop(seed->__hdop),
+	_magvar(seed->__magnetic_variation),
+	_satellites_visible(seed->__satellites_visible),
+	_fix_quality(seed->__fix_quality),
+	_fix(seed->__fix) {
+}
+
 nmea_err_t NMEA_Parser::parse(char* nmea, uint8_t len) {
 	register nmea_err_t err;
 

@@ -70,6 +70,7 @@ typedef struct {
 class NMEA_Parser {
 public:
 	NMEA_Parser(void);
+	NMEA_Parser(nmea_storage_t* seed);
 	nmea_err_t parse(char* nmea, uint8_t len = 0);
 
 	nmea_timestamp_t timestamp(void);
