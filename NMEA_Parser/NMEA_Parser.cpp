@@ -597,7 +597,7 @@ nmea_err_t NMEA_Parser::parse_date(char* nmea) {
 }
 
 nmea_err_t NMEA_Parser::parse_time(char* nmea) {
-	register uint8_t tmp;
+	register uint16_t tmp;
 
 	tmp  = (nmea[1] - '0') * 10;
 	tmp += (nmea[2] - '0');
