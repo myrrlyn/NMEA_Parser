@@ -1,5 +1,11 @@
 # Changelog
 
+### v0.5.1
+
+- Fix bug in timestamp parsing. The old code used an 8-bit unsigned temp, so the
+millisecond values would wrap every 256. The new code uses a 16-bit unsigned
+temp, so all possible values will be handled.
+
 ### v0.5.0
 
 - Add ability to construct from a saved state
