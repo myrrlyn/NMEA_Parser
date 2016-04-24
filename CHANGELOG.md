@@ -1,5 +1,11 @@
 # Changelog
 
+### v0.5.2
+
+- Change the source directory from `NMEA_Parser/` to `src/`. This is necessary
+for the project to be directly usable as a library in another PlatformIO
+project's `lib/` tree.
+
 ### v0.5.1
 
 - Fix bug in timestamp parsing. The old code used an 8-bit unsigned temp, so the
